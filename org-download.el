@@ -34,7 +34,7 @@
 (eval-when-compile
   (require 'cl))
 
-(defun org-store-image (link basedir)
+(defun org-download--image (link basedir)
   (async-start
    `(lambda() (shell-command
           ,(format "wget \"%s\" -P \"%s\""
@@ -45,7 +45,7 @@
        (with-current-buffer cur-buf
          (org-display-inline-images))))))
 
-(defun org-store-image-clipboard (link)
+(defun org-download-image (link)
   "Save image at address LINK to current directory's sub-directory DIR.
 DIR is the name of the current level 0 heading."
   (interactive (list (current-kill 0)))
@@ -57,14 +57,21 @@ DIR is the name of the current level 0 heading."
     (if (null (image-type-from-file-name filename))
         (message "not an image URL")
       (unless (file-exists-p (expand-file-name filename dir))
-        (org-store-image link dir))
-      (insert (format "[[./%s/%s]]" dir filename))
+        (org-download--image link dir))
+      (if (looking-back "^[ \t]+")
+          (delete-region (match-beginning 0) (match-end 0))
+        (newline))
+      (insert (format "#+DOWNLOADED: %s @ %s\n [[./%s/%s]]"
+                      link
+                      (format-time-string "%Y-%m-%d %H:%M:%S")
+                      dir
+                      filename))
       (org-display-inline-images))))
 
-(setcdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\)://" dnd-protocol-alist) 'dnd-org-insert)
+(setcdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\)://" dnd-protocol-alist) 'org-download-dnd)
 
-(defun dnd-org-insert (uri action)
-  (org-store-image-clipboard uri))
+(defun org-download-dnd (uri action)
+  (org-download-image uri))
 
 (provide 'org-download)
 ;;; org-download.el ends here
