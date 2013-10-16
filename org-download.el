@@ -34,6 +34,9 @@
 (eval-when-compile
   (require 'cl))
 
+(defvar org-download-image-dir nil
+  "If not nil, `org-download-image' will store images here.")
+
 (defun org-download--image (link basedir)
   (async-start
    `(lambda() (shell-command
@@ -50,10 +53,13 @@
 DIR is the name of the current level 0 heading."
   (interactive (list (current-kill 0)))
   (let ((filename (car (last (split-string link "/"))))
-        (dir (save-excursion
-               (org-up-heading-all (1- (org-current-level)))
-               (substring-no-properties
-                (org-get-heading)))))
+        (dir (or org-download-image-dir
+                 (format
+                  "./%s"
+                  (save-excursion
+                    (org-up-heading-all (1- (org-current-level)))
+                    (substring-no-properties
+                     (org-get-heading)))))))
     (if (null (image-type-from-file-name filename))
         (message "not an image URL")
       (unless (file-exists-p (expand-file-name filename dir))
@@ -61,7 +67,7 @@ DIR is the name of the current level 0 heading."
       (if (looking-back "^[ \t]+")
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
-      (insert (format "#+DOWNLOADED: %s @ %s\n [[./%s/%s]]"
+      (insert (format "#+DOWNLOADED: %s @ %s\n [[%s/%s]]"
                       link
                       (format-time-string "%Y-%m-%d %H:%M:%S")
                       dir
