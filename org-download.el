@@ -27,9 +27,9 @@
 ;; an org-mode buffer in Emacs.
 ;; The image will be downloaded to an appropriate folder and a link
 ;; to it will be inserted at point.
-
+;;
+;;; Code:
 
-
 (require 'async)
 (eval-when-compile
   (require 'cl))
@@ -47,7 +47,7 @@
 (defvar org-download--backend-cmd nil
   "Backend command for downloading.
 
-Do not set this directly. Customize `org-download-backend' instead.")
+Do not set this directly.  Customize `org-download-backend' instead.")
 
 (defcustom org-download-backend 'wget
   "Set this to 'wget or 'curl."
@@ -55,7 +55,7 @@ Do not set this directly. Customize `org-download-backend' instead.")
          (case value
            (wget (setq org-download--backend-cmd "wget \"%s\" -O \"%s\""))
            (curl (setq org-download--backend-cmd "curl \"%s\" -o \"%s\""))
-           (t (error "Unsupported key: %s." value)))
+           (t (error "Unsupported key: %s" value)))
          (set-default symbol value)))
 
 (defun org-download-get-heading (lvl)
@@ -116,12 +116,14 @@ DIR is the name of the current level 0 heading."
   (org-download-image uri))
 
 (defun org-download-enable ()
+  "Enable org-download."
   (unless (eq (cdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\)://" dnd-protocol-alist))
               'org-download-dnd)
     (setq dnd-protocol-alist
           `(("^\\(https?\\|ftp\\|file\\|nfs\\)://" . org-download-dnd) ,@dnd-protocol-alist))))
 
 (defun org-download-disable ()
+  "Disable org-download."
   (rassq-delete-all 'org-download-dnd dnd-protocol-alist))
 
 (org-download-enable)
