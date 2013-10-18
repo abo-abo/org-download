@@ -126,6 +126,19 @@ DIR is the name of the current level 0 heading."
                       filename))
       (org-display-inline-images))))
 
+(defun org-download-delete ()
+  "Delete inline image link on current line, and the file that it points to."
+  (interactive)
+  (save-excursion
+    (beginning-of-line)
+    (if (looking-at ".*?\\[\\[\\([^]]*\\)\\]\\]")
+        (progn
+          (let ((str (match-string-no-properties 1)))
+            (delete-region (match-beginning 0)
+                           (match-end 0))
+            (when (file-exists-p str)
+              (delete-file str)))))))
+
 (defun org-download-dnd (uri action)
   (org-download-image uri))
 
