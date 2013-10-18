@@ -60,7 +60,7 @@ Do not set this directly.  Customize `org-download-backend' instead.")
   :group 'org-download)
 
 (defcustom org-download-timestamp "_%Y-%m-%d_%H:%M:%S"
-  "This will be substituted into `format-time-string' and appended to the file name.
+  "This `format-time-string'-style string will be appended to the file name.
 Set this to \"\" if you don't want time stamps."
   :type 'string
   :group 'org-download)
@@ -126,18 +126,45 @@ DIR is the name of the current level 0 heading."
                       filename))
       (org-display-inline-images))))
 
+(defun org-download--at-comment-p ()
+  "Check if current line begins with #+DOWLOADED:."
+  (save-excursion
+    (move-beginning-of-line nil)
+    (looking-at "#\\+DOWNLOADED:")))
+
 (defun org-download-delete ()
   "Delete inline image link on current line, and the file that it points to."
   (interactive)
+  (cond ((org-download--at-comment-p)
+         (delete-region (line-beginning-position)
+                        (line-end-position))
+         (org-download--delete (line-beginning-position)
+                               nil
+                               1))
+        ((region-active-p)
+         (org-download--delete (region-beginning)
+                               (region-end))
+         (delete-region (region-beginning)
+                        (region-end)))
+
+        (t (org-download--delete (line-beginning-position)
+                              (line-end-position)))))
+
+(defun org-download--delete (beg end &optional times)
+  "Delete inline image links and the files they point to between BEG and END.
+
+When TIMES isn't nil, delete only TIMES links."
+  (unless times
+    (setq times most-positive-fixnum))
   (save-excursion
-    (beginning-of-line)
-    (if (looking-at ".*?\\[\\[\\([^]]*\\)\\]\\]")
-        (progn
-          (let ((str (match-string-no-properties 1)))
-            (delete-region (match-beginning 0)
-                           (match-end 0))
-            (when (file-exists-p str)
-              (delete-file str)))))))
+    (goto-char beg)
+    (while (and (>= (decf times) 0)
+                (re-search-forward "\\[\\[\\([^]]*\\)\\]\\]" end t))
+      (let ((str (match-string-no-properties 1)))
+        (delete-region (match-beginning 0)
+                       (match-end 0))
+        (when (file-exists-p str)
+          (delete-file str))))))
 
 (defun org-download-dnd (uri action)
   (org-download-image uri))
