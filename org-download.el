@@ -114,7 +114,7 @@ custom variables."
           (progn
             (re-search-forward "\n\n" nil 'move)
             (point)))
-         (write-file filename (current-buffer))
+         (write-region nil nil filename nil nil nil 'confirm)
          (with-current-buffer buffer
            (org-display-inline-images)))
        (list
