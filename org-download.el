@@ -56,7 +56,14 @@ Do not set this directly.  Customize `org-download-backend' instead.")
            (wget (setq org-download--backend-cmd "wget \"%s\" -O \"%s\""))
            (curl (setq org-download--backend-cmd "curl \"%s\" -o \"%s\""))
            (t (error "Unsupported key: %s" value)))
-         (set-default symbol value)))
+         (set-default symbol value))
+  :group 'org-download)
+
+(defcustom org-download-timestamp "_%Y-%m-%d_%H:%M:%S"
+  "This will be substituted into `format-time-string' and appended to the file name.
+Set this to \"\" if you don't want time stamps."
+  :type 'string
+  :group 'org-download)
 
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
@@ -79,10 +86,17 @@ Do not set this directly.  Customize `org-download-backend' instead.")
     dir))
 
 (defun org-download--fullname (link)
-  "Return the file name where LINK will be saved to."
+  "Return the file name where LINK will be saved to.
+
+It's affected by `org-download-timestamp' and `org-download-image-dir'
+custom variables."
   (let ((filename (car (last (split-string link "/"))))
         (dir (org-download--dir)))
-    (format "%s/%s" dir filename)))
+    (format "%s/%s%s.%s"
+            dir
+            (file-name-sans-extension filename)
+            (format-time-string org-download-timestamp)
+            (file-name-extension filename))))
 
 (defun org-download--image (link to)
   "Save LINK to TO using wget."
