@@ -33,6 +33,7 @@
 
 (eval-when-compile
   (require 'cl))
+(require 'url-parse)
 
 (defgroup org-download nil
   "Image drag-and-drop for org-mode."
@@ -40,24 +41,18 @@
   :prefix "org-download-")
 
 (defcustom org-download-image-dir nil
-  "If not nil, `org-download-image' will store images here."
-  :type 'string
+  "If set, images will be stored in this directory
+instead of the default (see `org-download-image'.)"
+  :type '(choice (const :tag "Default" nil)
+                 (string :tag "Directory"))
   :group 'org-download)
 
-(defvar org-download--backend-cmd nil
-  "Backend command for downloading.
-
-Do not set this directly.  Customize `org-download-backend' instead.")
-
-(defcustom org-download-backend 'wget
-  "Set this to `wget' or `curl' or `url-retrieve'"
-  :set (lambda (symbol value)
-         (case value
-           (wget (setq org-download--backend-cmd "wget \"%s\" -O \"%s\""))
-           (curl (setq org-download--backend-cmd "curl \"%s\" -o \"%s\""))
-           (url-retrieve t)
-           (t (error "Unsupported key: %s" value)))
-         (set-default symbol value))
+(defcustom org-download-backend t
+  "Method to use for downloading"
+  :type '(choice
+          (const :tag "wget" "wget \"%s\" -O \"%s\"")
+          (const :tag "curl" "curl \"%s\" -o \"%s\"")
+          (const :tag "url-retrieve" t))
   :group 'org-download)
 
 (defcustom org-download-timestamp "_%Y-%m-%d_%H:%M:%S"
@@ -91,7 +86,10 @@ Set this to \"\" if you don't want time stamps."
 
 It's affected by `org-download-timestamp' and `org-download-image-dir'
 custom variables."
-  (let ((filename (car (last (split-string link "/"))))
+  (let ((filename
+         (file-name-nondirectory
+          (car (url-path-and-query
+                (url-generic-parse-url link)))))
         (dir (org-download--dir)))
     (format "%s/%s%s.%s"
             dir
@@ -101,14 +99,16 @@ custom variables."
 
 (defun org-download--image (link filename)
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
-  (if (eq org-download-backend 'url-retrieve)
+  (if (eq org-download-backend t)
       (url-retrieve
        link
        (lambda (status filename buffer)
-         "Write current buffer to FILENAME and update inline images in BUFFER"
+         ;; Write current buffer to FILENAME
+         ;; and update inline images in BUFFER
          (let ((err (plist-get status :error)))
-           (if err
-               (signal :error (cdr err))))
+           (if err (error
+                    "\"%s\" %s." link
+                    (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
          (delete-region
           (point-min)
           (progn
@@ -125,7 +125,7 @@ custom variables."
     (require 'async)
     (async-start
      `(lambda() (shell-command
-                 ,(format org-download--backend-cmd link filename)))
+                 ,(format org-download-backend link filename)))
      (lexical-let ((cur-buf (current-buffer)))
        (lambda(x)
          (with-current-buffer cur-buf
