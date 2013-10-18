@@ -34,17 +34,63 @@
 (eval-when-compile
   (require 'cl))
 
-(defvar org-download-image-dir nil
-  "If not nil, `org-download-image' will store images here.")
+(defgroup org-download nil
+  "Image drag-and-drop for org-mode."
+  :group 'org
+  :prefix "org-download-")
 
-(defun org-download--image (link basedir)
+(defcustom org-download-image-dir nil
+  "If not nil, `org-download-image' will store images here."
+  :type 'string
+  :group 'org-download)
+
+(defvar org-download--backend-cmd nil
+  "Backend command for downloading.
+
+Do not set this directly. Customize `org-download-backend' instead.")
+
+(defcustom org-download-backend 'wget
+  "Set this to 'wget or 'curl."
+  :set (lambda (symbol value)
+         (case value
+           (wget (setq org-download--backend-cmd "wget \"%s\" -O \"%s\""))
+           (curl (setq org-download--backend-cmd "curl \"%s\" -o \"%s\""))
+           (t (error "Unsupported key: %s." value)))
+         (set-default symbol value)))
+
+(defun org-download-get-heading (lvl)
+  "Return the heading of the current entry's LVL level parent."
+  (save-excursion
+    (let ((cur-lvl (org-current-level)))
+      (unless (= cur-lvl 1)
+        (org-up-heading-all (- (1- (org-current-level)) lvl)))
+      (substring-no-properties
+       (org-get-heading)))))
+
+(defun org-download--dir ()
+  "Return the directory where the images will be saved to."
+  (let ((dir (expand-file-name
+              (or org-download-image-dir
+                  (format
+                   "./%s"
+                   (org-download-get-heading 0))))))
+    (unless (file-exists-p dir)
+      (make-directory dir t))
+    dir))
+
+(defun org-download--fullname (link)
+  "Return the file name where LINK will be saved to."
+  (let ((filename (car (last (split-string link "/"))))
+        (dir (org-download--dir)))
+    (format "%s/%s" dir filename)))
+
+(defun org-download--image (link to)
+  "Save LINK to TO using wget."
   (async-start
    `(lambda() (shell-command
-          ,(format "wget \"%s\" -P \"%s\""
-                   link
-                   (expand-file-name basedir))))
+          ,(format org-download--backend-cmd link to)))
    (lexical-let ((cur-buf (current-buffer)))
-     (lambda(x) (message "Async process done")
+     (lambda(x)
        (with-current-buffer cur-buf
          (org-display-inline-images))))))
 
@@ -52,25 +98,17 @@
   "Save image at address LINK to current directory's sub-directory DIR.
 DIR is the name of the current level 0 heading."
   (interactive (list (current-kill 0)))
-  (let ((filename (car (last (split-string link "/"))))
-        (dir (or org-download-image-dir
-                 (format
-                  "./%s"
-                  (save-excursion
-                    (org-up-heading-all (1- (org-current-level)))
-                    (substring-no-properties
-                     (org-get-heading)))))))
+  (let ((filename (org-download--fullname link)))
     (if (null (image-type-from-file-name filename))
         (message "not an image URL")
-      (unless (file-exists-p (expand-file-name filename dir))
-        (org-download--image link dir))
+      (unless (file-exists-p filename)
+        (org-download--image link filename))
       (if (looking-back "^[ \t]+")
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
-      (insert (format "#+DOWNLOADED: %s @ %s\n [[%s/%s]]"
+      (insert (format "#+DOWNLOADED: %s @ %s\n [[%s]]"
                       link
                       (format-time-string "%Y-%m-%d %H:%M:%S")
-                      dir
                       filename))
       (org-display-inline-images))))
 
