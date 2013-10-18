@@ -30,7 +30,7 @@
 ;;
 ;;; Code:
 
-(require 'async)
+
 (eval-when-compile
   (require 'cl))
 
@@ -50,11 +50,12 @@
 Do not set this directly.  Customize `org-download-backend' instead.")
 
 (defcustom org-download-backend 'wget
-  "Set this to 'wget or 'curl."
+  "Set this to `wget' or `curl' or `url-retrieve'"
   :set (lambda (symbol value)
          (case value
            (wget (setq org-download--backend-cmd "wget \"%s\" -O \"%s\""))
            (curl (setq org-download--backend-cmd "curl \"%s\" -o \"%s\""))
+           (url-retrieve t)
            (t (error "Unsupported key: %s" value)))
          (set-default symbol value))
   :group 'org-download)
@@ -98,15 +99,36 @@ custom variables."
             (format-time-string org-download-timestamp)
             (file-name-extension filename))))
 
-(defun org-download--image (link to)
-  "Save LINK to TO using wget."
-  (async-start
-   `(lambda() (shell-command
-          ,(format org-download--backend-cmd link to)))
-   (lexical-let ((cur-buf (current-buffer)))
-     (lambda(x)
-       (with-current-buffer cur-buf
-         (org-display-inline-images))))))
+(defun org-download--image (link filename)
+  "Save LINK to FILENAME asynchronously and show inline images in current buffer."
+  (if (eq org-download-backend 'url-retrieve)
+      (url-retrieve
+       link
+       (lambda (status filename buffer)
+         "Write current buffer to FILENAME and update inline images in BUFFER"
+         (let ((err (plist-get status :error)))
+           (if err
+               (signal :error (cdr err))))
+         (delete-region
+          (point-min)
+          (progn
+            (re-search-forward "\n\n" nil 'move)
+            (point)))
+         (write-file filename (current-buffer))
+         (with-current-buffer buffer
+           (org-display-inline-images)))
+       (list
+        filename
+        (current-buffer))
+       nil t)
+    (require 'async)
+    (async-start
+     `(lambda() (shell-command
+                 ,(format org-download--backend-cmd link filename)))
+     (lexical-let ((cur-buf (current-buffer)))
+       (lambda(x)
+         (with-current-buffer cur-buf
+           (org-display-inline-images)))))))
 
 (defun org-download-image (link)
   "Save image at address LINK to current directory's sub-directory DIR.
