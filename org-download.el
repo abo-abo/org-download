@@ -74,10 +74,18 @@ DIR is the name of the current level 0 heading."
                       filename))
       (org-display-inline-images))))
 
-(setcdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\)://" dnd-protocol-alist) 'org-download-dnd)
-
 (defun org-download-dnd (uri action)
   (org-download-image uri))
 
+(defun org-download-enable ()
+  (unless (eq (cdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\)://" dnd-protocol-alist))
+              'org-download-dnd)
+    (setq dnd-protocol-alist
+          `(("^\\(https?\\|ftp\\|file\\|nfs\\)://" . org-download-dnd) ,@dnd-protocol-alist))))
+
+(defun org-download-disable ()
+  (rassq-delete-all 'org-download-dnd dnd-protocol-alist))
+
+(org-download-enable)
 (provide 'org-download)
 ;;; org-download.el ends here
