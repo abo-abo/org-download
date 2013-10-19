@@ -163,10 +163,14 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
          (with-current-buffer cur-buf
            (org-display-inline-images)))))))
 
+(defun org-download-yank ()
+  "Call `org-download-image' with current kill."
+  (interactive)
+  (org-download-image (current-kill 0)))
+
 (defun org-download-image (link)
-  "Save image at address LINK to current directory's sub-directory DIR.
-DIR is the name of the current level 0 heading."
-  (interactive (list (current-kill 0)))
+  "Save image at address LINK to `org-download--dir'."
+  (interactive "sUrl: ")
   (let ((filename (org-download--fullname link)))
     (if (null (image-type-from-file-name filename))
         (message "not an image URL")
