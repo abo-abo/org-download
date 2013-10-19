@@ -27,6 +27,16 @@
 ;; an org-mode buffer in Emacs.
 ;; The image will be downloaded to an appropriate folder and a link
 ;; to it will be inserted at point.
+;; The folder is constructed in two stages:
+;; * first part of the folder name is:
+;;   either "." (current folder)
+;;   or `org-download-image-dir' (if it's not nil).
+;; * second part is:
+;;   either "" (nothing) when `org-download-heading-lvl' is nil
+;;   or the name of current heading with level `org-download-heading-lvl'
+;;   Level count starts with 0, i.e. * is 0, ** is 1, *** is 2 etc.
+;;   `org-download-heading-lvl' becomes buffer-local when set, so each
+;;   file can customize this value.
 ;;
 ;;; Code:
 
@@ -42,14 +52,19 @@
   :prefix "org-download-")
 
 (defcustom org-download-image-dir nil
-  "If set, images will be stored in this directory
-instead of the default (see `org-download-image'.)"
+  "If set, images will be stored in this directory instead of \".\".
+See `org-download--dir-1' for more info."
   :type '(choice (const :tag "Default" nil)
                  (string :tag "Directory"))
   :group 'org-download)
+(make-variable-buffer-local 'org-download-image-dir)
+
+(defvar org-download-heading-lvl 0
+  "Heading level to be used in `org-download--dir-2'.")
+(make-variable-buffer-local 'org-download-heading-lvl)
 
 (defcustom org-download-backend t
-  "Method to use for downloading"
+  "Method to use for downloading."
   :type '(choice
           (const :tag "wget" "wget \"%s\" -O \"%s\"")
           (const :tag "curl" "curl \"%s\" -o \"%s\"")
@@ -71,13 +86,29 @@ Set this to \"\" if you don't want time stamps."
       (substring-no-properties
        (org-get-heading)))))
 
+(defun org-download--dir-1 ()
+  "Return the first part of the directory path for `org-download--dir'.
+It's `org-download-image-dir', unless it's nil.  Then it's \".\"."
+  (or org-download-image-dir "."))
+
+(defun org-download--dir-2 ()
+  "Return the second part of the directory path for `org-download--dir'.
+Unless `org-download-heading-lvl' is nil, it's the name of the current
+`org-download-heading-lvl'-leveled heading.  Otherwise it's \"\"."
+  (and org-download-heading-lvl
+       (org-download-get-heading
+        org-download-heading-lvl)))
+
 (defun org-download--dir ()
-  "Return the directory where the images will be saved to."
-  (let ((dir (expand-file-name
-              (or org-download-image-dir
-                  (format
-                   "./%s"
-                   (org-download-get-heading 0))))))
+  "Return the directory path for image storage.
+
+The path is composed from `org-download--dir-1' and `org-download--dir-2'.
+The directory is created if it didn't exist before."
+  (let* ((part1 (org-download--dir-1))
+         (part2 (org-download--dir-2))
+         (dir (if part2
+                  (format "%s/%s" part1 part2)
+                part1)))
     (unless (file-exists-p dir)
       (make-directory dir t))
     dir))
@@ -85,8 +116,7 @@ Set this to \"\" if you don't want time stamps."
 (defun org-download--fullname (link)
   "Return the file name where LINK will be saved to.
 
-It's affected by `org-download-timestamp' and `org-download-image-dir'
-custom variables."
+It's affected by `org-download-timestamp' and `org-download--dir'."
   (let ((filename
          (file-name-nondirectory
           (car (url-path-and-query
@@ -108,7 +138,7 @@ custom variables."
          ;; and update inline images in BUFFER
          (let ((err (plist-get status :error)))
            (if err (error
-                    "\"%s\" %s." link
+                    "\"%s\" %s" link
                     (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
          (delete-region
           (point-min)
@@ -120,13 +150,14 @@ custom variables."
          (with-current-buffer buffer
            (org-display-inline-images)))
        (list
-        filename
+        (expand-file-name filename)
         (current-buffer))
        nil t)
     (require 'async)
     (async-start
      `(lambda() (shell-command
-                 ,(format org-download-backend link filename)))
+                 ,(format org-download-backend link
+                          (expand-file-name filename))))
      (lexical-let ((cur-buf (current-buffer)))
        (lambda(x)
          (with-current-buffer cur-buf
