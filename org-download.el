@@ -34,6 +34,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'url-parse)
+(require 'url-http)
 
 (defgroup org-download nil
   "Image drag-and-drop for org-mode."
