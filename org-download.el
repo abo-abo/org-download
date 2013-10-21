@@ -51,11 +51,19 @@
   :group 'org
   :prefix "org-download-")
 
+(defcustom org-download-method 'directory
+  "The way images should be stored."
+  :type '(choice
+          (const :tag "Directory" directory)
+          (const :tag "Attachment" attach))
+  :group 'org-download)
+
 (defcustom org-download-image-dir nil
   "If set, images will be stored in this directory instead of \".\".
 See `org-download--dir-1' for more info."
-  :type '(choice (const :tag "Default" nil)
-                 (string :tag "Directory"))
+  :type '(choice
+          (const :tag "Default" nil)
+          (string :tag "Directory"))
   :group 'org-download)
 (make-variable-buffer-local 'org-download-image-dir)
 
@@ -171,11 +179,22 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
-  (let ((filename (org-download--fullname link)))
+  (let ((filename
+         (if (eq org-download-method 'attach)
+             (let (org-download-image-dir
+                   org-download-heading-lvl)
+               (org-download--fullname link))
+           (org-download--fullname link))))
     (if (null (image-type-from-file-name filename))
         (message "not an image URL")
-      (unless (file-exists-p filename)
-        (org-download--image link filename))
+      (org-download--image link filename)
+      (when (eq org-download-method 'attach)
+        (require 'org-attach)
+        (org-attach-attach filename nil 'mv)
+        (let* ((attach-dir (org-attach-dir t)))
+          (setq filename
+                (expand-file-name
+                 (file-name-nondirectory filename) attach-dir))))
       (if (looking-back "^[ \t]+")
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
