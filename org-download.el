@@ -197,8 +197,15 @@ scrot supports:
 1. capture window: single click
 2. general area: mouse drag"
   (interactive)
-  (let ((link (format-time-string "/tmp/screenshot.png")))
+  (let ((link "/tmp/screenshot.png"))
     (shell-command (format "scrot -s %s" link))
+    (org-download-image link)))
+
+(defun org-download-gnome-screenshot ()
+  "Call gnome-screenshot and insert the resulting file."
+  (interactive)
+  (let ((link "/tmp/screenshot.png"))
+    (shell-command (format "gnome-screenshot -f %s" link))
     (org-download-image link)))
 
 (defun org-download-image (link)
