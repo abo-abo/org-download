@@ -138,12 +138,12 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
 
 (defun org-download--image (link filename)
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
-  (cond ((string-match "^file://\\(.*\\)" link)
+  (when (string-match "^file://\\(.*\\)" link)
+    (setq link (url-unhex-string (match-string 1 link))))
+  (cond ((file-exists-p link)
          (org-download--image/command
           "cp \"%s\" \"%s\""
-          (url-unhex-string
-           (match-string 1 link))
-          filename))
+          link filename))
         ((eq org-download-backend t)
          (org-download--image/url-retrieve link filename))
         (t (org-download--image/command org-download-backend link filename))))
