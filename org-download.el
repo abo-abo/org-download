@@ -104,6 +104,14 @@ Set this to \"\" if you don't want time stamps."
   :type 'string
   :group 'org-download)
 
+(defcustom org-download-screenshot-method "gnome-screenshot -a -f %s"
+  "The tool to capture screenshots."
+  :type '(choice
+          (const :tag "gnome-screenshot" "gnome-screenshot -a -f %s")
+          (const :tag "scrot" "scrot -s %s")
+          (const :tag "gm" "gm import %s"))
+  :group 'org-download)
+
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
   (save-excursion
@@ -209,25 +217,12 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
   (interactive)
   (org-download-image (current-kill 0)))
 
-(defun org-download-scrot ()
-  "Call \"scrot -s\" and insert the resulting file.
-scrot supports:
-1. capture window: single click
-2. general area: mouse drag"
+(defun org-download-screenshot ()
+  "Capture screenshoot and insert the resulting file.
+The screenshot tool is determined by `org-download-sceenshot-method'."
   (interactive)
   (let ((link "/tmp/screenshot.png"))
-    (shell-command (format "scrot -s %s" link))
-    (org-download-image link)))
-
-(defun org-download-gnome-screenshot (arg)
-  "Call gnome-screenshot and insert the resulting file.
-Without a prefix argument screen area is selected with the mouse.
-With a prefix argument grab the entire screen."
-  (interactive "P")
-  (let ((link "/tmp/screenshot.png"))
-    (shell-command (format "gnome-screenshot %s -f %s"
-                           (if arg "" "-a")
-                           link))
+    (shell-command (format org-download-screenshot-method link))
     (org-download-image link)))
 
 (defun org-download-image (link)
