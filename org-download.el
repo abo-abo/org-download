@@ -201,11 +201,15 @@ scrot supports:
     (shell-command (format "scrot -s %s" link))
     (org-download-image link)))
 
-(defun org-download-gnome-screenshot ()
-  "Call gnome-screenshot and insert the resulting file."
-  (interactive)
+(defun org-download-gnome-screenshot (arg)
+  "Call gnome-screenshot and insert the resulting file.
+Without a prefix argument screen area is selected with the mouse.
+With a prefix argument grab the entire screen."
+  (interactive "P")
   (let ((link "/tmp/screenshot.png"))
-    (shell-command (format "gnome-screenshot -f %s" link))
+    (shell-command (format "gnome-screenshot %s -f %s"
+                           (if arg "" "-a")
+                           link))
     (org-download-image link)))
 
 (defun org-download-image (link)
