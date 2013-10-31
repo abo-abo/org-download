@@ -23,20 +23,38 @@
 
 ;;; Commentary:
 ;;
-;; This extension enables dragging an image from a browser to
-;; an org-mode buffer in Emacs.
-;; The image will be downloaded to an appropriate folder and a link
-;; to it will be inserted at point.
-;; The folder is constructed in two stages:
-;; * first part of the folder name is:
-;;   either "." (current folder)
-;;   or `org-download-image-dir' (if it's not nil).
-;; * second part is:
-;;   either "" (nothing) when `org-download-heading-lvl' is nil
-;;   or the name of current heading with level `org-download-heading-lvl'
-;;   Level count starts with 0, i.e. * is 0, ** is 1, *** is 2 etc.
-;;   `org-download-heading-lvl' becomes buffer-local when set, so each
-;;   file can customize this value.
+;; This extension facilitates moving images from point A to point B.
+;;
+;; Point A (the source) can be:
+;; 1. An image inside your browser that you can drag to Emacs.
+;; 2. An image on your file system that you can drag to Emacs.
+;; 3. A local or remote image address in kill-ring.
+;;    Use `org-download-yank' for this.
+;;    Remember that you can use "0 w" in `dired' to get an address.
+;; 4. An screenshot taken using `gnome-screenshot' or `scrot'.
+;;
+;; Point B (the target) is an Emacs `org-mode' buffer where the inline
+;; link will be inserted. Several customization options will determine
+;; where exactly on the file system the file will be stored.
+;;
+;; They are:
+;; `org-download-method':
+;; a. 'attach => use `org-mode' attachment machinery
+;; b. 'directory => construct the directory in two stages:
+;;    1. first part of the folder name is:
+;;       * either "." (current folder)
+;;       * or `org-download-image-dir' (if it's not nil).
+;;         `org-download-image-dir' becomes buffer-local when set,
+;;         so each file can customize this value, e.g with:
+;;         # -*- mode: Org; org-download-image-dir: ~/Pictures/foo; -*-
+;;    2. second part is:
+;;       * `org-download-heading-lvl' is nil => ""
+;;       * `org-download-heading-lvl' is n => the name of current
+;;         heading with level n. Level count starts with 0,
+;;         i.e. * is 0, ** is 1, *** is 2 etc.
+;;         `org-download-heading-lvl' becomes buffer-local when set,
+;;         so each file can customize this value, e.g with:
+;;         # -*- mode: Org; org-download-heading-lvl: nil; -*-
 ;;
 ;;; Code:
 
@@ -67,8 +85,9 @@ See `org-download--dir-1' for more info."
   :group 'org-download)
 (make-variable-buffer-local 'org-download-image-dir)
 
-(defvar org-download-heading-lvl 0
-  "Heading level to be used in `org-download--dir-2'.")
+(defcustom org-download-heading-lvl 0
+  "Heading level to be used in `org-download--dir-2'."
+  :group 'org-download)
 (make-variable-buffer-local 'org-download-heading-lvl)
 
 (defcustom org-download-backend t
@@ -141,12 +160,11 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
   (when (string-match "^file://\\(.*\\)" link)
     (setq link (url-unhex-string (match-string 1 link))))
   (cond ((file-exists-p link)
-         (org-download--image/command
-          "cp \"%s\" \"%s\""
-          link filename))
+         (org-download--image/command "cp \"%s\" \"%s\"" link filename))
         ((eq org-download-backend t)
          (org-download--image/url-retrieve link filename))
-        (t (org-download--image/command org-download-backend link filename))))
+        (t
+         (org-download--image/command org-download-backend link filename))))
 
 (defun org-download--image/command (command link filename)
   "Using COMMAND, save LINK to FILENAME.
