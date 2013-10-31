@@ -138,38 +138,53 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
 
 (defun org-download--image (link filename)
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
-  (if (eq org-download-backend t)
-      (url-retrieve
-       link
-       (lambda (status filename buffer)
-         ;; Write current buffer to FILENAME
-         ;; and update inline images in BUFFER
-         (let ((err (plist-get status :error)))
-           (if err (error
-                    "\"%s\" %s" link
-                    (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
-         (delete-region
-          (point-min)
-          (progn
-            (re-search-forward "\n\n" nil 'move)
-            (point)))
-         (let ((coding-system-for-write 'no-conversion))
-           (write-region nil nil filename nil nil nil 'confirm))
-         (with-current-buffer buffer
-           (org-display-inline-images)))
-       (list
-        (expand-file-name filename)
-        (current-buffer))
-       nil t)
-    (require 'async)
-    (async-start
-     `(lambda() (shell-command
-                 ,(format org-download-backend link
-                          (expand-file-name filename))))
-     (lexical-let ((cur-buf (current-buffer)))
-       (lambda(x)
-         (with-current-buffer cur-buf
-           (org-display-inline-images)))))))
+  (cond ((string-match "^file://\\(.*\\)" link)
+         (org-download--image/command
+          "cp \"%s\" \"%s\""
+          (url-unhex-string
+           (match-string 1 link))
+          filename))
+        ((eq org-download-backend t)
+         (org-download--image/url-retrieve link filename))
+        (t (org-download--image/command org-download-backend link filename))))
+
+(defun org-download--image/command (command link filename)
+  "Using COMMAND, save LINK to FILENAME.
+COMMAND is a format-style string with two slots for LINK and FILENAME."
+  (require 'async)
+  (async-start
+   `(lambda() (shell-command
+          ,(format command link
+                   (expand-file-name filename))))
+   (lexical-let ((cur-buf (current-buffer)))
+     (lambda(x)
+       (with-current-buffer cur-buf
+         (org-display-inline-images))))))
+
+(defun org-download--image/url-retrieve (link filename)
+  "Save LINK to FILENAME using `url-retrieve'."
+  (url-retrieve
+   link
+   (lambda (status filename buffer)
+     ;; Write current buffer to FILENAME
+     ;; and update inline images in BUFFER
+     (let ((err (plist-get status :error)))
+       (if err (error
+                "\"%s\" %s" link
+                (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
+     (delete-region
+      (point-min)
+      (progn
+        (re-search-forward "\n\n" nil 'move)
+        (point)))
+     (let ((coding-system-for-write 'no-conversion))
+       (write-region nil nil filename nil nil nil 'confirm))
+     (with-current-buffer buffer
+       (org-display-inline-images)))
+   (list
+    (expand-file-name filename)
+    (current-buffer))
+   nil t))
 
 (defun org-download-yank ()
   "Call `org-download-image' with current kill."
