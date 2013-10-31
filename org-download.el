@@ -191,6 +191,16 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
   (interactive)
   (org-download-image (current-kill 0)))
 
+(defun org-download-scrot ()
+  "Call \"scrot -s\" and insert the resulting file.
+scrot supports:
+1. capture window: single click
+2. general area: mouse drag"
+  (interactive)
+  (let ((link (format-time-string "/tmp/screenshot.png")))
+    (shell-command (format "scrot -s %s" link))
+    (org-download-image link)))
+
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
