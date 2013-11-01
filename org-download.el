@@ -112,6 +112,11 @@ Set this to \"\" if you don't want time stamps."
           (const :tag "gm" "gm import %s"))
   :group 'org-download)
 
+(defcustom org-download-image-width 0
+  "When non-zero add #+attr_html: :width tag to the image."
+  :type 'integer
+  :group 'org-download)
+
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
   (save-excursion
@@ -247,9 +252,12 @@ The screenshot tool is determined by `org-download-sceenshot-method'."
       (if (looking-back "^[ \t]+")
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
-      (insert (format "#+DOWNLOADED: %s @ %s\n [[%s]]"
+      (insert (format "#+DOWNLOADED: %s @ %s\n%s [[%s]]"
                       link
                       (format-time-string "%Y-%m-%d %H:%M:%S")
+                      (if (= org-download-image-width 0)
+                          ""
+                        (format "#+attr_html: :width %dpx\n" org-download-image-width))
                       filename))
       (org-display-inline-images))))
 
