@@ -243,19 +243,15 @@ The screenshot tool is determined by `org-download-screenshot-method'."
   (interactive "sUrl: ")
   (let ((filename
          (if (eq org-download-method 'attach)
-             (let (org-download-image-dir
+             (let ((org-download-image-dir (progn (require 'org-attach)
+                                                  (org-attach-dir t)))
                    org-download-heading-lvl)
                (org-download--fullname link))
            (org-download--fullname link))))
     (when (image-type-from-file-name filename)
       (org-download--image link filename)
       (when (eq org-download-method 'attach)
-        (require 'org-attach)
-        (org-attach-attach filename nil 'mv)
-        (let* ((attach-dir (org-attach-dir t)))
-          (setq filename
-                (expand-file-name
-                 (file-name-nondirectory filename) attach-dir))))
+        (org-attach-attach filename nil 'none))
       (if (looking-back "^[ \t]+")
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
