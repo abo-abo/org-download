@@ -10,8 +10,8 @@
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 3, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
 ;; This program is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -231,8 +231,8 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
   (org-download-image (current-kill 0)))
 
 (defun org-download-screenshot ()
-  "Capture screenshoot and insert the resulting file.
-The screenshot tool is determined by `org-download-sceenshot-method'."
+  "Capture screenshot and insert the resulting file.
+The screenshot tool is determined by `org-download-screenshot-method'."
   (interactive)
   (let ((link "/tmp/screenshot.png"))
     (shell-command (format org-download-screenshot-method link))
@@ -334,5 +334,7 @@ Otherwise, pass URI and ACTION back to dnd dispatch."
   (rassq-delete-all 'org-download-dnd dnd-protocol-alist))
 
 (org-download-enable)
+
 (provide 'org-download)
+
 ;;; org-download.el ends here
