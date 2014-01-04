@@ -29,12 +29,14 @@
 ;; 1. An image inside your browser that you can drag to Emacs.
 ;; 2. An image on your file system that you can drag to Emacs.
 ;; 3. A local or remote image address in kill-ring.
-;;    Use `org-download-yank' for this.
+;;    Use the `org-download-yank' command for this.
 ;;    Remember that you can use "0 w" in `dired' to get an address.
-;; 4. An screenshot taken using `gnome-screenshot' or `scrot'.
+;; 4. An screenshot taken using `gnome-screenshot' or `scrot' or `gm'.
+;;    Use the `org-download-screenshot' command for this.
+;;    Customize the backend with  `org-download-screenshot-method'.
 ;;
 ;; Point B (the target) is an Emacs `org-mode' buffer where the inline
-;; link will be inserted. Several customization options will determine
+;; link will be inserted.  Several customization options will determine
 ;; where exactly on the file system the file will be stored.
 ;;
 ;; They are:
@@ -55,6 +57,12 @@
 ;;         `org-download-heading-lvl' becomes buffer-local when set,
 ;;         so each file can customize this value, e.g with:
 ;;         # -*- mode: Org; org-download-heading-lvl: nil; -*-
+;;
+;; `org-download-timestamp':
+;; optionally add a timestamp to the file name.
+;;
+;; Customize `org-download-backend' to choose between `url-retrieve'
+;; (the default) or `wget' or `curl'.
 ;;
 ;;; Code:
 
@@ -239,8 +247,7 @@ The screenshot tool is determined by `org-download-sceenshot-method'."
                    org-download-heading-lvl)
                (org-download--fullname link))
            (org-download--fullname link))))
-    (if (null (image-type-from-file-name filename))
-        (message "not an image URL")
+    (when (image-type-from-file-name filename)
       (org-download--image link filename)
       (when (eq org-download-method 'attach)
         (require 'org-attach)
@@ -283,7 +290,7 @@ The screenshot tool is determined by `org-download-sceenshot-method'."
                         (region-end)))
 
         (t (org-download--delete (line-beginning-position)
-                              (line-end-position)))))
+                                 (line-end-position)))))
 
 (defun org-download--delete (beg end &optional times)
   "Delete inline image links and the files they point to between BEG and END.
@@ -302,7 +309,18 @@ When TIMES isn't nil, delete only TIMES links."
           (delete-file str))))))
 
 (defun org-download-dnd (uri action)
-  (org-download-image uri))
+  "When in `org-mode' and URI points to image, download it.
+Otherwise, pass URI and ACTION back to dnd dispatch."
+  (if (eq major-mode 'org-mode)
+      ;; probably shouldn't redirect
+      (unless (org-download-image uri)
+        (message "not an image URL"))
+    ;; redirect to someone else
+    (let ((dnd-protocol-alist
+           (rassq-delete-all
+            'org-download-dnd
+            (copy-alist dnd-protocol-alist))))
+      (dnd-handle-one-url nil action uri))))
 
 (defun org-download-enable ()
   "Enable org-download."
