@@ -6,7 +6,7 @@
 ;; Keywords: images, screenshots, download
 ;; Homepage: http://orgmode.org
 
-;; This file is part of GNU Emacs.
+;; This file is not part of GNU Emacs.
 
 ;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@
 ;;       * or `org-download-image-dir' (if it's not nil).
 ;;         `org-download-image-dir' becomes buffer-local when set,
 ;;         so each file can customize this value, e.g with:
-;;         # -*- mode: Org; org-download-image-dir: ~/Pictures/foo; -*-
+;;         # -*- mode: Org; org-download-image-dir: "~/Pictures/foo"; -*-
 ;;    2. second part is:
 ;;       * `org-download-heading-lvl' is nil => ""
 ;;       * `org-download-heading-lvl' is n => the name of current
