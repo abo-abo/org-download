@@ -173,11 +173,15 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
           (car (url-path-and-query
                 (url-generic-parse-url link)))))
         (dir (org-download--dir)))
-    (format "%s/%s%s.%s"
-            dir
-            (file-name-sans-extension filename)
-            (format-time-string org-download-timestamp)
-            (file-name-extension filename))))
+    (when (string-match ".*?\\.\\(?:png\\|jpg\\)\\(.*\\)$" filename)
+      (setq filename (replace-match "" nil nil filename 1)))
+    (abbreviate-file-name
+     (expand-file-name
+      (format "%s%s.%s"
+              (file-name-sans-extension filename)
+              (format-time-string org-download-timestamp)
+              (file-name-extension filename))
+      dir))))
 
 (defun org-download--image (link filename)
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
