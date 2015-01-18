@@ -129,10 +129,13 @@ Set this to \"\" if you don't want time stamps."
   "Return the heading of the current entry's LVL level parent."
   (save-excursion
     (let ((cur-lvl (org-current-level)))
-      (unless (= cur-lvl 1)
-        (org-up-heading-all (- (1- (org-current-level)) lvl)))
-      (substring-no-properties
-       (org-get-heading)))))
+      (if cur-lvl
+          (progn
+            (unless (= cur-lvl 1)
+              (org-up-heading-all (- (1- (org-current-level)) lvl)))
+            (substring-no-properties
+             (org-get-heading)))
+        ""))))
 
 (defun org-download--dir-1 ()
   "Return the first part of the directory path for `org-download--dir'.
