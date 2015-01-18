@@ -183,7 +183,8 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
   (when (string-match "^file://\\(.*\\)" link)
     (setq link (url-unhex-string (match-string 1 link))))
-  (cond ((file-exists-p link)
+  (cond ((and (not (file-remote-p link))
+              (file-exists-p link))
          (org-download--image/command "cp \"%s\" \"%s\"" link filename))
         ((eq org-download-backend t)
          (org-download--image/url-retrieve link filename))
