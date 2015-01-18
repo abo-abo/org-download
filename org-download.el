@@ -112,6 +112,14 @@ Set this to \"\" if you don't want time stamps."
   :type 'string
   :group 'org-download)
 
+(defcustom org-download-img-regex-list
+  '("<img +src=\"" "<img +\\(class=\"[^\"]+\"\\)? *src=\"")
+  "This regex is used to unalias links that look like images.
+The html to which the links points will be searched for these
+regexes, one by one, until one succeeds.  The found image address
+will be used."
+  :group 'org-download)
+
 (defcustom org-download-screenshot-method "gnome-screenshot -a -f %s"
   "The tool to capture screenshots."
   :type '(choice
@@ -250,14 +258,18 @@ The screenshot tool is determined by `org-download-screenshot-method'."
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
   (unless (image-type-from-file-name link)
-    (unless (setq link
-                  (with-current-buffer
-                      (url-retrieve-synchronously link t)
-                    (goto-char (point-min))
-                    (when (re-search-forward "<img +\\(class=\"[^\"]+\"\\)? *src=\"")
-                      (backward-char)
-                      (read (current-buffer)))))
-      (error "link %s does not point to an image; unaliasing failed" link)))
+    (with-current-buffer
+        (url-retrieve-synchronously link t)
+      (let ((regexes org-download-img-regex-list)
+            lnk)
+        (while (and (not lnk) regexes)
+          (goto-char (point-min))
+          (when (re-search-forward (pop regexes) nil t)
+            (backward-char)
+            (setq lnk (read (current-buffer)))))
+        (if lnk
+            (setq link lnk)
+          (error "link %s does not point to an image; unaliasing failed" link)))))
   (let ((filename
          (if (eq org-download-method 'attach)
              (let ((org-download-image-dir (progn (require 'org-attach)
