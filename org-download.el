@@ -249,6 +249,15 @@ The screenshot tool is determined by `org-download-screenshot-method'."
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
+  (unless (image-type-from-file-name link)
+    (unless (setq link
+                  (with-current-buffer
+                      (url-retrieve-synchronously link t)
+                    (goto-char (point-min))
+                    (when (re-search-forward "<img +\\(class=\"[^\"]+\"\\)? *src=\"")
+                      (backward-char)
+                      (read (current-buffer)))))
+      (error "link %s does not point to an image; unaliasing failed" link)))
   (let ((filename
          (if (eq org-download-method 'attach)
              (let ((org-download-image-dir (progn (require 'org-attach)
@@ -263,13 +272,15 @@ The screenshot tool is determined by `org-download-screenshot-method'."
       (if (looking-back "^[ \t]+")
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
-      (insert (format "#+DOWNLOADED: %s @ %s\n%s [[%s]]"
-                      link
-                      (format-time-string "%Y-%m-%d %H:%M:%S")
-                      (if (= org-download-image-width 0)
-                          ""
-                        (format "#+attr_html: :width %dpx\n" org-download-image-width))
-                      filename))
+      (insert
+       (format "#+DOWNLOADED: %s @ %s\n%s [[%s]]"
+               link
+               (format-time-string "%Y-%m-%d %H:%M:%S")
+               (if (= org-download-image-width 0)
+                   ""
+                 (format
+                  "#+attr_html: :width %dpx\n" org-download-image-width))
+               filename))
       (org-display-inline-images))))
 
 (defun org-download--at-comment-p ()
