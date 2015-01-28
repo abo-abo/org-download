@@ -338,16 +338,41 @@ When TIMES isn't nil, delete only TIMES links."
 (defun org-download-dnd (uri action)
   "When in `org-mode' and URI points to image, download it.
 Otherwise, pass URI and ACTION back to dnd dispatch."
-  (if (eq major-mode 'org-mode)
-      ;; probably shouldn't redirect
-      (unless (org-download-image uri)
-        (message "not an image URL"))
-    ;; redirect to someone else
-    (let ((dnd-protocol-alist
-           (rassq-delete-all
-            'org-download-dnd
-            (copy-alist dnd-protocol-alist))))
-      (dnd-handle-one-url nil action uri))))
+  (cond ((eq major-mode 'org-mode)
+         ;; probably shouldn't redirect
+         (unless (org-download-image uri)
+           (message "not an image URL")))
+        ((eq major-mode 'dired-mode)
+         (org-download-dired uri))
+        ;; redirect to someone else
+        (t
+         (let ((dnd-protocol-alist
+                (rassq-delete-all
+                 'org-download-dnd
+                 (copy-alist dnd-protocol-alist))))
+           (dnd-handle-one-url nil action uri)))))
+
+(defun org-download-dired (uri)
+  "Download URI to current directory."
+  (raise-frame)
+  (let ((filename (file-name-nondirectory
+                   (car (url-path-and-query
+                         (url-generic-parse-url uri))))))
+    (message "Downloading %s to %s ..."
+             filename
+             (expand-file-name filename))
+    (url-retrieve
+     uri
+     (lambda (status filename)
+       (let ((err (plist-get status :error)))
+         (if err (error
+                  "\"%s\" %s" uri
+                  (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
+       (let ((coding-system-for-write 'no-conversion))
+         (write-region nil nil filename nil nil nil 'confirm)))
+     (list
+      (expand-file-name filename))
+     t t)))
 
 (defun org-download-enable ()
   "Enable org-download."
