@@ -5,6 +5,7 @@
 ;; Author: Oleh Krehel
 ;; Keywords: images, screenshots, download
 ;; Homepage: http://orgmode.org
+;; Package-Requires: ((async "1.2"))
 
 ;; This file is not part of GNU Emacs.
 
