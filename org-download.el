@@ -270,7 +270,7 @@ The screenshot tool is determined by `org-download-screenshot-method'."
             (setq lnk (read (current-buffer)))))
         (if lnk
             (setq link lnk)
-          (error "link %s does not point to an image; unaliasing failed" link)))))
+          (error "Link %s does not point to an image; unaliasing failed" link)))))
   (let ((filename
          (if (eq org-download-method 'attach)
              (let ((org-download-image-dir (progn (require 'org-attach)
@@ -375,6 +375,7 @@ Otherwise, pass URI and ACTION back to dnd dispatch."
       (expand-file-name filename))
      t t)))
 
+;;;###autoload
 (defun org-download-enable ()
   "Enable org-download."
   (unless (eq (cdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\)://" dnd-protocol-alist))
