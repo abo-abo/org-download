@@ -124,6 +124,7 @@ will be used."
 (defcustom org-download-screenshot-method "gnome-screenshot -a -f %s"
   "The tool to capture screenshots."
   :type '(choice
+	  (const :tag "screencapture -i %s") ;; screenshot script in osx, -i standars for iterative, press space key to toggle bettwen selection and  window/application mode.
           (const :tag "gnome-screenshot" "gnome-screenshot -a -f %s")
           (const :tag "scrot" "scrot -s %s")
           (const :tag "gm" "gm import %s"))
