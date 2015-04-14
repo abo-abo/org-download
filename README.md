@@ -23,22 +23,27 @@ They are:
    1. first part of the folder name is:
       * either "." (current folder)
       * or `org-download-image-dir` (if it's not nil).
-      
+
         `org-download-image-dir` becomes buffer-local when set,
         so each file can customize this value, e.g with:
 
                 -*- mode: Org; org-download-image-dir: ~/Pictures/foo; -*-
 
+        To set it for all files at once, use this:
+
+                (setq-default org-download-image-dir "~/Pictures/foo")
+
+
    2. second part is:
       * `org-download-heading-lvl` is nil => ""
       * `org-download-heading-lvl` is n => the name of current
-        heading with level n. 
+        heading with level n.
 
         Level count starts with 0,
         i.e. * is 0, ** is 1, *** is 2 etc.
         `org-download-heading-lvl` becomes buffer-local when set,
         so each file can customize this value, e.g with:
-        
+
                 -*- mode: Org; org-download-heading-lvl: nil; -*-
 
 `org-download-timestamp`:
