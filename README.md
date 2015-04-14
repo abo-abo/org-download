@@ -27,7 +27,7 @@ They are:
         `org-download-image-dir` becomes buffer-local when set,
         so each file can customize this value, e.g with:
 
-                -*- mode: Org; org-download-image-dir: ~/Pictures/foo; -*-
+                -*- mode: Org; org-download-image-dir: "~/Pictures/foo"; -*-
 
         To set it for all files at once, use this:
 
