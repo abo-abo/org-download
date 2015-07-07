@@ -259,6 +259,9 @@ The screenshot tool is determined by `org-download-screenshot-method'."
     (shell-command (format org-download-screenshot-method link))
     (org-download-image link)))
 
+(declare-function org-attach-dir "org-attach")
+(declare-function org-attach-attach "org-attach")
+
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
