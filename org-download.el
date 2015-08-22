@@ -107,7 +107,7 @@ See `org-download--dir-1' for more info."
           (const :tag "url-retrieve" t))
   :group 'org-download)
 
-(defcustom org-download-timestamp "_%Y-%m-%d_%H:%M:%S"
+(defcustom org-download-timestamp "_%Y-%m-%d_%H-%M-%S"
   "This `format-time-string'-style string will be appended to the file name.
 Set this to \"\" if you don't want time stamps."
   :type 'string
@@ -198,11 +198,11 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
 
 (defun org-download--image (link filename)
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
-  (when (string-match "^file://\\(.*\\)" link)
-    (setq link (url-unhex-string (match-string 1 link))))
+  (when (string= "file" (url-type (url-generic-parse-url link)))
+    (setq link (url-unhex-string (url-filename (url-generic-parse-url link)))))
   (cond ((and (not (file-remote-p link))
               (file-exists-p link))
-         (org-download--image/command "cp \"%s\" \"%s\"" link filename))
+         (copy-file link (expand-file-name filename)))
         ((eq org-download-backend t)
          (org-download--image/url-retrieve link filename))
         (t
@@ -385,10 +385,10 @@ Otherwise, pass URI and ACTION back to dnd dispatch."
 ;;;###autoload
 (defun org-download-enable ()
   "Enable org-download."
-  (unless (eq (cdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\)://" dnd-protocol-alist))
+  (unless (eq (cdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\):" dnd-protocol-alist))
               'org-download-dnd)
     (setq dnd-protocol-alist
-          `(("^\\(https?\\|ftp\\|file\\|nfs\\)://" . org-download-dnd) ,@dnd-protocol-alist))))
+          `(("^\\(https?\\|ftp\\|file\\|nfs\\):" . org-download-dnd) ,@dnd-protocol-alist))))
 
 (defun org-download-disable ()
   "Disable org-download."
