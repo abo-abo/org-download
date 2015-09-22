@@ -146,8 +146,7 @@ will be used."
           (progn
             (unless (= cur-lvl 1)
               (org-up-heading-all (- (1- (org-current-level)) lvl)))
-            (substring-no-properties
-             (org-get-heading)))
+            (nth 4 (org-heading-components)))
         ""))))
 
 (defun org-download--dir-1 ()
