@@ -3,9 +3,10 @@
 ;; Copyright (C) 2014 Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel
-;; Keywords: images, screenshots, download
-;; Homepage: http://orgmode.org
+;; URL: https://github.com/abo-abo/org-download
+;; Version: 0.1.0
 ;; Package-Requires: ((async "1.2"))
+;; Keywords: images, screenshots, download
 
 ;; This file is not part of GNU Emacs.
 
@@ -69,9 +70,11 @@
 
 
 (eval-when-compile
-  (require 'cl))
+  (require 'cl)
+  (require 'async))
 (require 'url-parse)
 (require 'url-http)
+(require 'org)
 
 (defgroup org-download nil
   "Image drag-and-drop for org-mode."
@@ -288,7 +291,7 @@ The screenshot tool is determined by `org-download-screenshot-method'."
       (org-download--image link filename)
       (when (eq org-download-method 'attach)
         (org-attach-attach filename nil 'none))
-      (if (looking-back "^[ \t]+")
+      (if (looking-back "^[ \t]+" (line-beginning-position))
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
       (insert
