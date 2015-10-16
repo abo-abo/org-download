@@ -295,7 +295,7 @@ The screenshot tool is determined by `org-download-screenshot-method'."
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
       (insert
-       (format "#+DOWNLOADED: %s @ %s\n%s [[%s]]"
+       (format "#+DOWNLOADED: %s @ %s\n%s[[%s]]"
                link
                (format-time-string "%Y-%m-%d %H:%M:%S")
                (if (= org-download-image-width 0)
