@@ -264,6 +264,17 @@ The screenshot tool is determined by `org-download-screenshot-method'."
 (declare-function org-attach-dir "org-attach")
 (declare-function org-attach-attach "org-attach")
 
+(defun org-download-annotate-default (link)
+  "Annotate LINK with the time of download."
+  (format "#+DOWNLOADED: %s @ %s"
+          link
+          (format-time-string "%Y-%m-%d %H:%M:%S")))
+
+(defvar org-download-annotate-function
+  #'org-download-annotate-default
+  "Function that takes LINK and returns a string.
+It's inserted before the image link and is used to annotate it.")
+
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
@@ -295,14 +306,14 @@ The screenshot tool is determined by `org-download-screenshot-method'."
           (delete-region (match-beginning 0) (match-end 0))
         (newline))
       (insert
-       (format "#+DOWNLOADED: %s @ %s\n%s[[%s]]"
-               link
-               (format-time-string "%Y-%m-%d %H:%M:%S")
-               (if (= org-download-image-width 0)
-                   ""
-                 (format
-                  "#+attr_html: :width %dpx\n" org-download-image-width))
-               filename))
+       (concat
+        (funcall org-download-annotate-function link)
+        (format "\n%s[[%s]]"
+                (if (= org-download-image-width 0)
+                    ""
+                  (format
+                   "#+attr_html: :width %dpx\n" org-download-image-width))
+                filename)))
       (org-display-inline-images))))
 
 (defun org-download--at-comment-p ()
