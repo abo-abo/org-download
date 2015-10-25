@@ -179,10 +179,11 @@ The directory is created if it didn't exist before."
       (make-directory dir t))
     dir))
 
-(defun org-download--fullname (link)
+(defun org-download--fullname (link &optional ext)
   "Return the file name where LINK will be saved to.
 
-It's affected by `org-download-timestamp' and `org-download--dir'."
+It's affected by `org-download-timestamp' and `org-download--dir'.
+EXT can hold the file extension, in case LINK doesn't provide it."
   (let ((filename
          (file-name-nondirectory
           (car (url-path-and-query
@@ -195,7 +196,7 @@ It's affected by `org-download-timestamp' and `org-download--dir'."
       (format "%s%s.%s"
               (file-name-sans-extension filename)
               (format-time-string org-download-timestamp)
-              (file-name-extension filename))
+              (or ext (file-name-extension filename)))
       dir))))
 
 (defun org-download--image (link filename)
@@ -278,43 +279,48 @@ It's inserted before the image link and is used to annotate it.")
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
-  (unless (image-type-from-file-name link)
-    (with-current-buffer
-        (url-retrieve-synchronously link t)
-      (let ((regexes org-download-img-regex-list)
-            lnk)
-        (while (and (not lnk) regexes)
-          (goto-char (point-min))
-          (when (re-search-forward (pop regexes) nil t)
-            (backward-char)
-            (setq lnk (read (current-buffer)))))
-        (if lnk
-            (setq link lnk)
-          (error "Link %s does not point to an image; unaliasing failed" link)))))
-  (let ((filename
-         (if (eq org-download-method 'attach)
-             (let ((org-download-image-dir (progn (require 'org-attach)
-                                                  (org-attach-dir t)))
-                   org-download-heading-lvl)
-               (org-download--fullname link))
-           (org-download--fullname link))))
-    (when (image-type-from-file-name filename)
-      (org-download--image link filename)
-      (when (eq org-download-method 'attach)
-        (org-attach-attach filename nil 'none))
-      (if (looking-back "^[ \t]+" (line-beginning-position))
-          (delete-region (match-beginning 0) (match-end 0))
-        (newline))
-      (insert
-       (concat
-        (funcall org-download-annotate-function link)
-        (format "\n%s[[%s]]"
-                (if (= org-download-image-width 0)
-                    ""
-                  (format
-                   "#+attr_html: :width %dpx\n" org-download-image-width))
-                filename)))
-      (org-display-inline-images))))
+  (let (ext)
+    (unless (image-type-from-file-name link)
+      (with-current-buffer (url-retrieve-synchronously link t)
+        (cond ((let ((regexes org-download-img-regex-list)
+                     lnk)
+                 (while (and (not lnk) regexes)
+                   (goto-char (point-min))
+                   (when (re-search-forward (pop regexes) nil t)
+                     (backward-char)
+                     (setq lnk (read (current-buffer)))))
+                 (when lnk
+                   (setq link lnk))))
+              ((progn
+                 (goto-char (point-min))
+                 (when (re-search-forward "^Content-Type: image/\\(.*\\)$")
+                   (setq ext (match-string 1)))))
+              (t
+               (error "link %s does not point to an image; unaliasing failed" link)))))
+    (let ((filename
+           (if (eq org-download-method 'attach)
+               (let ((org-download-image-dir (progn (require 'org-attach)
+                                                    (org-attach-dir t)))
+                     org-download-heading-lvl)
+                 (org-download--fullname link ext))
+             (org-download--fullname link ext))))
+      (when (image-type-from-file-name filename)
+        (org-download--image link filename)
+        (when (eq org-download-method 'attach)
+          (org-attach-attach filename nil 'none))
+        (if (looking-back "^[ \t]+" (line-beginning-position))
+            (delete-region (match-beginning 0) (match-end 0))
+          (newline))
+        (insert
+         (concat
+          (funcall org-download-annotate-function link)
+          (format "\n%s[[%s]]"
+                  (if (= org-download-image-width 0)
+                      ""
+                    (format
+                     "#+attr_html: :width %dpx\n" org-download-image-width))
+                  filename)))
+        (org-display-inline-images)))))
 
 (defun org-download--at-comment-p ()
   "Check if current line begins with #+DOWLOADED:."
