@@ -344,7 +344,9 @@ It's inserted before the image link and is used to annotate it.")
                         (region-end)))
 
         (t (org-download--delete (line-beginning-position)
-                                 (line-end-position)))))
+                                 (line-end-position))))
+  (when (eq org-download-method 'attach)
+    (org-attach-sync)))
 
 (defun org-download--delete (beg end &optional times)
   "Delete inline image links and the files they point to between BEG and END.
