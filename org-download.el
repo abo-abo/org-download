@@ -70,8 +70,8 @@
 
 
 (eval-when-compile
-  (require 'cl)
-  (require 'async))
+  (require 'cl))
+(require 'async)
 (require 'url-parse)
 (require 'url-http)
 (require 'org)
@@ -133,7 +133,7 @@ will be used."
           ;; screenshot script in osx, -i standars for iterative,
           ;; press space key to toggle bettwen selection and
           ;; window/application mode.
-	  (const :tag "screencapture" "screencapture -i %s"))
+          (const :tag "screencapture" "screencapture -i %s"))
   :group 'org-download)
 
 (defcustom org-download-image-width 0
@@ -214,13 +214,12 @@ EXT can hold the file extension, in case LINK doesn't provide it."
 (defun org-download--image/command (command link filename)
   "Using COMMAND, save LINK to FILENAME.
 COMMAND is a format-style string with two slots for LINK and FILENAME."
-  (require 'async)
   (async-start
-   `(lambda() (shell-command
-          ,(format command link
-                   (expand-file-name filename))))
+   `(lambda () (shell-command
+                ,(format command link
+                         (expand-file-name filename))))
    (lexical-let ((cur-buf (current-buffer)))
-     (lambda(x)
+     (lambda (x)
        (with-current-buffer cur-buf
          (org-display-inline-images))))))
 
@@ -264,6 +263,7 @@ The screenshot tool is determined by `org-download-screenshot-method'."
 
 (declare-function org-attach-dir "org-attach")
 (declare-function org-attach-attach "org-attach")
+(declare-function org-attach-sync "org-attach")
 
 (defun org-download-annotate-default (link)
   "Annotate LINK with the time of download."
