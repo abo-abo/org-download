@@ -311,15 +311,15 @@ It's inserted before the image link and is used to annotate it.")
         (if (looking-back "^[ \t]+" (line-beginning-position))
             (delete-region (match-beginning 0) (match-end 0))
           (newline))
-        (insert
+	(insert
          (concat
           (funcall org-download-annotate-function link)
-          (format "\n%s[[%s]]"
+          (format "\n%s[[file:%s]]"
                   (if (= org-download-image-width 0)
                       ""
                     (format
                      "#+attr_html: :width %dpx\n" org-download-image-width))
-                  filename)))
+		  (file-relative-name filename (file-name-directory (buffer-name))))))
         (org-display-inline-images)))))
 
 (defun org-download--at-comment-p ()
