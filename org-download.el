@@ -378,22 +378,26 @@ When TIMES isn't nil, delete only TIMES links."
         (when (file-exists-p str)
           (delete-file str))))))
 
+(defun org-download-dnd-fallback (uri action)
+  (let ((dnd-protocol-alist
+         (rassq-delete-all
+          'org-download-dnd
+          (copy-alist dnd-protocol-alist))))
+    (dnd-handle-one-url nil action uri)))
+
 (defun org-download-dnd (uri action)
   "When in `org-mode' and URI points to image, download it.
 Otherwise, pass URI and ACTION back to dnd dispatch."
   (cond ((eq major-mode 'org-mode)
-         ;; probably shouldn't redirect
-         (unless (org-download-image uri)
-           (message "not an image URL")))
+         (condition-case nil
+             (org-download-image uri)
+           (error
+            (org-download-dnd-fallback uri action))))
         ((eq major-mode 'dired-mode)
          (org-download-dired uri))
         ;; redirect to someone else
         (t
-         (let ((dnd-protocol-alist
-                (rassq-delete-all
-                 'org-download-dnd
-                 (copy-alist dnd-protocol-alist))))
-           (dnd-handle-one-url nil action uri)))))
+         (org-download-dnd-fallback uri action))))
 
 (defun org-download-dired (uri)
   "Download URI to current directory."
