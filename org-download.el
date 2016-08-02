@@ -356,11 +356,13 @@ It's inserted before the image link and is used to annotate it.")
   (interactive)
   (let ((context (org-element-context)))
     (if (not (eq (car-safe context) 'link))
-	(user-error "not on a link")
+        (user-error "not on a link")
       (start-process-shell-command
        "org-download-edit"
        "org-download-edit"
-       (format org-download-edit-cmd (plist-get (cadr context) :path))))))
+       (format org-download-edit-cmd
+               (shell-quote-wildcard-pattern
+                (url-unhex-string (plist-get (cadr context) :path))))))))
 
 (defun org-download--delete (beg end &optional times)
   "Delete inline image links and the files they point to between BEG and END.
