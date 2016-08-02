@@ -360,7 +360,8 @@ It's inserted before the image link and is used to annotate it.")
       (start-process-shell-command
        "org-download-edit"
        "org-download-edit"
-       (format org-download-edit-cmd (plist-get (cadr context) :path))))))
+       (format org-download-edit-cmd
+               (url-unhex-string (plist-get (cadr context) :path)))))))
 
 (defun org-download--delete (beg end &optional times)
   "Delete inline image links and the files they point to between BEG and END.
