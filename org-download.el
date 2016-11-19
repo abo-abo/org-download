@@ -426,13 +426,27 @@ Otherwise, pass URI and ACTION back to dnd dispatch."
       (expand-file-name filename))
      t t)))
 
+(defun org-download-dnd-base64 (uri action)
+  (when (eq major-mode 'org-mode)
+    (when (string-match "^data:image/png;base64," uri)
+      (let* ((me (match-end 0))
+             (filename (org-download--fullname
+                        (substring-no-properties uri me (+ me 10))
+                        "png")))
+        (with-temp-buffer
+          (insert (base64-decode-string (substring uri me)))
+          (write-file filename))
+        (org-download-insert-link filename filename)))))
+
 ;;;###autoload
 (defun org-download-enable ()
   "Enable org-download."
   (unless (eq (cdr (assoc "^\\(https?\\|ftp\\|file\\|nfs\\):" dnd-protocol-alist))
               'org-download-dnd)
     (setq dnd-protocol-alist
-          `(("^\\(https?\\|ftp\\|file\\|nfs\\):" . org-download-dnd) ,@dnd-protocol-alist))))
+          `(("^\\(https?\\|ftp\\|file\\|nfs\\):" . org-download-dnd)
+            ("^data:" . org-download-dnd-base64)
+            ,@dnd-protocol-alist))))
 
 (defun org-download-disable ()
   "Disable org-download."
