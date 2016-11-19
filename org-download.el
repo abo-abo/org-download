@@ -308,19 +308,22 @@ It's inserted before the image link and is used to annotate it.")
         (org-download--image link filename)
         (when (eq org-download-method 'attach)
           (org-attach-attach filename nil 'none))
-        (if (looking-back "^[ \t]+" (line-beginning-position))
-            (delete-region (match-beginning 0) (match-end 0))
-          (newline))
-        (insert
-         (concat
-          (funcall org-download-annotate-function link)
-          (format "\n%s[[file:%s]]"
-                  (if (= org-download-image-width 0)
-                      ""
-                    (format
-                     "#+attr_html: :width %dpx\n" org-download-image-width))
-                  (file-relative-name filename (file-name-directory (buffer-name))))))
-        (org-display-inline-images)))))
+        (org-download-insert-link link filename)))))
+
+(defun org-download-insert-link (link filename)
+  (if (looking-back "^[ \t]+" (line-beginning-position))
+      (delete-region (match-beginning 0) (match-end 0))
+    (newline))
+  (insert
+   (concat
+    (funcall org-download-annotate-function link)
+    (format "\n%s[[file:%s]]"
+            (if (= org-download-image-width 0)
+                ""
+              (format
+               "#+attr_html: :width %dpx\n" org-download-image-width))
+            (file-relative-name filename (file-name-directory (buffer-name))))))
+  (org-display-inline-images))
 
 (defun org-download--at-comment-p ()
   "Check if current line begins with #+DOWLOADED:."
