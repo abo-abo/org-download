@@ -281,6 +281,10 @@ The screenshot tool is determined by `org-download-screenshot-method'."
   "Function that takes LINK and returns a string.
 It's inserted before the image link and is used to annotate it.")
 
+(defvar org-download-link-format
+  "[[file:%s]]"
+  "Format of the file link to insert.")
+
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
   (interactive "sUrl: ")
@@ -329,7 +333,7 @@ It's inserted before the image link and is used to annotate it.")
     (if (= org-download-image-latex-width 0)
         ""
       (format "#+attr_latex: :width %dcm\n" org-download-image-latex-width))
-    (format "[[file:%s]]" (file-relative-name filename (file-name-directory (buffer-name))))))
+    (format org-download-link-format (file-relative-name filename (file-name-directory (buffer-name))))))
   (org-display-inline-images))
 
 (defun org-download--at-comment-p ()
