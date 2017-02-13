@@ -85,7 +85,8 @@
   "The way images should be stored."
   :type '(choice
           (const :tag "Directory" directory)
-          (const :tag "Attachment" attach))
+          (const :tag "Attachment" attach)
+          (function :tag "Custom function"))
   :group 'org-download)
 
 (defcustom org-download-image-dir nil
@@ -312,12 +313,15 @@ It's inserted before the image link and is used to annotate it.")
               (t
                (error "link %s does not point to an image; unaliasing failed" link)))))
     (let ((filename
-           (if (eq org-download-method 'attach)
-               (let ((org-download-image-dir (progn (require 'org-attach)
-                                                    (org-attach-dir t)))
-                     org-download-heading-lvl)
-                 (org-download--fullname link ext))
-             (org-download--fullname link ext))))
+           (cond ((eq org-download-method 'attach)
+                  (let ((org-download-image-dir (progn (require 'org-attach)
+                                                       (org-attach-dir t)))
+                        org-download-heading-lvl)
+                    (org-download--fullname link ext)))
+                 ((fboundp org-download-method)
+                  (funcall org-download-method link))
+                 (t
+                  (org-download--fullname link ext)))))
       (when (image-type-from-file-name filename)
         (org-download--image link filename)
         (when (eq org-download-method 'attach)
