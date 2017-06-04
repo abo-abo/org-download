@@ -7,9 +7,10 @@ Point **A** (*the source*) can be:
 3. A local or remote image address in kill-ring.
    Use the `org-download-yank` command for this.
    Remember that you can use "0 w" in `dired` to get an address.
-4. An screenshot taken using `gnome-screenshot` or `scrot` or `gm`.
-   Use the `org-download-screenshot` command for this.
-   Customize the backend with  `org-download-screenshot-method`.
+4. A screenshot taken using `gnome-screenshot`, `scrot`, `gm`, `xclip`
+   (on Linux), `screencapture` (on OS X) or , `imagemagick/convert`
+   (on Windows).  Use the `org-download-screenshot` command for this.
+   Customize the backend with `org-download-screenshot-method`.
 
 Point **B** (*the target*) is an Emacs `org-mode` buffer where the inline
 link will be inserted.  Several customization options will determine
