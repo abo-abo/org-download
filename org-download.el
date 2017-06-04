@@ -134,7 +134,12 @@ will be used."
           ;; screenshot script in osx, -i standars for iterative,
           ;; press space key to toggle bettwen selection and
           ;; window/application mode.
-          (const :tag "screencapture" "screencapture -i %s"))
+          (const :tag "screencapture" "screencapture -i %s")
+          ;; take an image that is already on the clipboard, for Linux
+          (const :tag "xclip" "xclip -t image/png -selection clipboard -t image/png > %s")
+          ;; take an image that is already on the clipboard, for Windows
+          (const :tag "imagemagick/convert" "convert clipboard: %s")
+          )
   :group 'org-download)
 
 (defcustom org-download-image-html-width 0
