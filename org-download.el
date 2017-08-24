@@ -143,6 +143,11 @@ will be used."
           )
   :group 'org-download)
 
+(defcustom org-download-image-html-title ""
+  "When set add #+attr_html: :title tag to the image."
+  :type 'string
+  :group 'org-download)
+
 (defcustom org-download-image-html-width 0
   "When non-zero add #+attr_html: :width tag to the image."
   :type 'integer
@@ -342,6 +347,9 @@ It's inserted before the image link and is used to annotate it.")
    (concat
     (funcall org-download-annotate-function link)
     "\n"
+    (if (string= org-download-image-html-title "")
+        ""
+      (format "#+attr_html: :title %s\n" org-download-image-html-title))
     (if (= org-download-image-html-width 0)
         ""
       (format "#+attr_html: :width %dpx\n" org-download-image-html-width))
