@@ -136,6 +136,7 @@ will be used."
           (const :tag "gnome-screenshot" "gnome-screenshot -a -f %s")
           (const :tag "scrot" "scrot -s %s")
           (const :tag "gm" "gm import %s")
+          (const :tag "imagemagick/import" "import %s")
           ;; screenshot script in osx, -i stands for interactive,
           ;; press space key to toggle between selection and
           ;; window/application mode.
