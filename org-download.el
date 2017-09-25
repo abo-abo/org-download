@@ -137,11 +137,13 @@ will be used."
           (const :tag "screencapture" "screencapture -i %s")
           ;; take an image that is already on the clipboard, for Linux
           (const :tag "xclip"
-                 "xclip -selection clipboard -t image/png -o > %s")
+           "xclip -selection clipboard -t image/png -o > %s")
           ;; take an image that is already on the clipboard, for Windows
-          (const :tag "imagemagick/convert" "convert clipboard: %s")
-          )
+          (const :tag "imagemagick/convert" "convert clipboard: %s"))
   :group 'org-download)
+
+(defcustom org-download-screenshot-file "/tmp/screenshot.png"
+  "The file to capture screenshots.")
 
 (defcustom org-download-image-html-width 0
   "When non-zero add #+attr_html: :width tag to the image."
@@ -274,9 +276,9 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
   "Capture screenshot and insert the resulting file.
 The screenshot tool is determined by `org-download-screenshot-method'."
   (interactive)
-  (let ((link "/tmp/screenshot.png"))
-    (shell-command (format org-download-screenshot-method link))
-    (org-download-image link)))
+  (shell-command (format org-download-screenshot-method
+                         org-download-screenshot-file))
+  (org-download-image org-download-screenshot-file))
 
 (declare-function org-attach-dir "org-attach")
 (declare-function org-attach-attach "org-attach")
