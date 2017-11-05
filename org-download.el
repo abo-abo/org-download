@@ -103,6 +103,10 @@ See `org-download--dir-1' for more info."
   :group 'org-download)
 (make-variable-buffer-local 'org-download-heading-lvl)
 
+(defvar org-download-path-last-file nil
+  "Variable to hold the full path of the last downloaded file.
+See `org-download-rename-last-file'.")
+
 (defcustom org-download-backend t
   "Method to use for downloading."
   :type '(choice
@@ -330,11 +334,33 @@ It's inserted before the image link and is used to annotate it.")
                   (funcall org-download-method link))
                  (t
                   (org-download--fullname link ext)))))
+      (setq org-download-path-last-file filename)
       (when (image-type-from-file-name filename)
         (org-download--image link filename)
         (when (eq org-download-method 'attach)
           (org-attach-attach filename nil 'none))
         (org-download-insert-link link filename)))))
+
+(defun org-download-rename-last-file ()
+  "Rename the last downloaded file saved in your computer."
+  (interactive)
+  (let* ((dir-path (org-download--dir))
+         (newname (read-string "Rename last file to: "))
+         (ext (file-name-extension org-download-path-last-file))
+         (newpath (concat dir-path "/" newname "." ext)))
+    (when org-download-path-last-file
+      (rename-file org-download-path-last-file newpath 1)
+      (org-download-replace-all
+       (file-name-nondirectory org-download-path-last-file)
+       (concat newname "." ext))
+      (setq org-download-path-last-file newpath))))
+
+(defun org-download-replace-all (oldpath newpath)
+  "Function to search for the OLDPATH inside the buffer and replace it by the NEWPATH."
+  (save-excursion
+    (beginning-of-buffer)
+    (while (re-search-forward oldpath nil t)
+      (replace-match newpath))))
 
 (defun org-download-insert-link (link filename)
   (if (looking-back "^[ \t]+" (line-beginning-position))
