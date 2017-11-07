@@ -104,10 +104,9 @@ See `org-download--dir-1' for more info."
   :group 'org-download)
 (make-variable-buffer-local 'org-download-heading-lvl)
 
-(defvar org-download-path-last-file nil
-  "Variable to hold the full path of the last downloaded file to be used in the `org-download-rename-last-file'."
-  :group 'org-download)
-(make-variable-buffer-local 'org-download-path-last-file)
+(defvar org-download-path-last-file
+  nil
+  "Variable to hold the full path of the last downloaded file to be used in the `org-download-rename-last-file'.")
 
 (defcustom org-download-backend t
   "Method to use for downloading."
