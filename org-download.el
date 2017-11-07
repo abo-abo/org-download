@@ -353,7 +353,8 @@ It's inserted before the image link and is used to annotate it.")
       (org-download-replace-all
        (file-name-nondirectory org-download-path-last-file)
        (concat newname "." ext))
-      (setq org-download-path-last-file newpath))))
+      (setq org-download-path-last-file newpath)
+      (org-display-inline-images))))
 
 (defun org-download-replace-all (oldpath newpath)
   "Function to search for the OLDPATH inside the buffer and replace it by the NEWPATH."
