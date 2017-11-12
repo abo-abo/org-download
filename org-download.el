@@ -341,6 +341,19 @@ It's inserted before the image link and is used to annotate it.")
           (org-attach-attach filename nil 'none))
         (org-download-insert-link link filename)))))
 
+(defun org-download-rename-at-point ()
+  "Rename image at point."
+  (interactive)
+  (let* ((dir-path (org-download--dir))
+         (current-name (file-name-nondirectory (ffap-file-at-point)))
+         (current-path (concat dir-path "/" current-name))
+         (ext (file-name-extension current-name))
+         (new-name (read-string "Rename file at point to: "))
+         (new-path (concat dir-path "/" new-name "." ext)))
+    (rename-file current-path new-path)
+    (message "File successfully renamed...")
+    (org-download-replace-all current-name (concat new-name "." ext))))
+
 (defun org-download-rename-last-file ()
   "Rename the last downloaded file saved in your computer."
   (interactive)
