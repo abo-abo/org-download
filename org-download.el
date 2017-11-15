@@ -345,7 +345,8 @@ It's inserted before the image link and is used to annotate it.")
   "Rename image at point."
   (interactive)
   (let* ((dir-path (org-download--dir))
-         (current-name (file-name-nondirectory (ffap-file-at-point)))
+         (current-name (file-name-nondirectory
+                        (org-element-property :path (org-element-context))))
          (current-path (concat dir-path "/" current-name))
          (ext (file-name-extension current-name))
          (new-name (read-string "Rename file at point to: "))
