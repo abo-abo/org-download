@@ -415,6 +415,16 @@ It's inserted before the image link and is used to annotate it.")
          (delete-region (region-beginning)
                         (region-end)))
 
+        ((looking-at org-any-link-re)
+         (let ((fname (org-link-unescape
+                       (match-string-no-properties 2))))
+           (when (file-exists-p fname)
+             (delete-file fname)
+             (delete-region (match-beginning 0)
+                            (match-end 0))
+             (when (eolp)
+               (delete-char 1)))))
+
         (t (org-download--delete (line-beginning-position)
                                  (line-end-position))))
   (when (eq org-download-method 'attach)
