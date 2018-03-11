@@ -359,7 +359,7 @@ It's inserted before the image link and is used to annotate it.")
   "Rename the last downloaded file saved in your computer."
   (interactive)
   (let* ((dir-path (org-download--dir))
-         (newname (read-string "Rename last file to: "))
+         (newname (read-string "Rename last file to: " (file-name-base org-download-path-last-file)))
          (ext (file-name-extension org-download-path-last-file))
          (newpath (concat dir-path "/" newname "." ext)))
     (when org-download-path-last-file
