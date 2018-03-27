@@ -100,7 +100,7 @@ See `org-download--dir-1' for more info."
 
 (defcustom org-download-heading-lvl 0
   "Heading level to be used in `org-download--dir-2'."
-  :group 'org-download)
+  :type 'integer)
 (make-variable-buffer-local 'org-download-heading-lvl)
 
 (defvar org-download-path-last-file nil
@@ -127,6 +127,7 @@ Set this to \"\" if you don't want time stamps."
 The html to which the links points will be searched for these
 regexes, one by one, until one succeeds.  The found image address
 will be used."
+  :type '(repeat string)
   :group 'org-download)
 
 (defcustom org-download-screenshot-method "gnome-screenshot -a -f %s"
@@ -147,7 +148,8 @@ will be used."
   :group 'org-download)
 
 (defcustom org-download-screenshot-file "/tmp/screenshot.png"
-  "The file to capture screenshots.")
+  "The file to capture screenshots."
+  :type 'string)
 
 (defcustom org-download-image-html-width 0
   "When non-zero add #+attr_html: :width tag to the image."
@@ -376,7 +378,7 @@ It's inserted before the image link and is used to annotate it.")
 (defun org-download-replace-all (oldpath newpath)
   "Function to search for the OLDPATH inside the buffer and replace it by the NEWPATH."
   (save-excursion
-    (beginning-of-buffer)
+    (goto-char (point-min))
     (while (re-search-forward oldpath nil t)
       (replace-match newpath))))
 
@@ -434,7 +436,8 @@ It's inserted before the image link and is used to annotate it.")
     (org-attach-sync)))
 
 (defcustom org-download-edit-cmd "gimp %s"
-  "Command for editing an image link.")
+  "Command for editing an image link."
+  :type 'string)
 
 (defun org-download-edit ()
   "Open the image at point for editing."
