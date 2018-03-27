@@ -246,24 +246,27 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
        (with-current-buffer cur-buf
          (org-display-inline-images))))))
 
+(defun org-download--write-image (status filename)
+  ;; Write current buffer to FILENAME
+  (let ((err (plist-get status :error)))
+    (when err
+      (error
+       "HTTP error %s"
+       (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
+  (delete-region
+   (point-min)
+   (progn
+     (re-search-forward "\n\n" nil 'move)
+     (point)))
+  (let ((coding-system-for-write 'no-conversion))
+    (write-region nil nil filename nil nil nil 'confirm)))
+
 (defun org-download--image/url-retrieve (link filename)
   "Save LINK to FILENAME using `url-retrieve'."
   (url-retrieve
    link
    (lambda (status filename buffer)
-     ;; Write current buffer to FILENAME
-     ;; and update inline images in BUFFER
-     (let ((err (plist-get status :error)))
-       (if err (error
-                "\"%s\" %s" link
-                (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
-     (delete-region
-      (point-min)
-      (progn
-        (re-search-forward "\n\n" nil 'move)
-        (point)))
-     (let ((coding-system-for-write 'no-conversion))
-       (write-region nil nil filename nil nil nil 'confirm))
+     (org-download--write-image status filename)
      (with-current-buffer buffer
        (org-display-inline-images)))
    (list
@@ -495,12 +498,9 @@ Otherwise, pass URI and ACTION back to dnd dispatch."
     (url-retrieve
      uri
      (lambda (status filename)
-       (let ((err (plist-get status :error)))
-         (if err (error
-                  "\"%s\" %s" uri
-                  (downcase (nth 2 (assq (nth 2 err) url-http-codes))))))
-       (let ((coding-system-for-write 'no-conversion))
-         (write-region nil nil filename nil nil nil 'confirm)))
+       (org-download--write-image status filename)
+       (dired (file-name-directory filename))
+       (revert-buffer))
      (list
       (expand-file-name filename))
      t t)))

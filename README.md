@@ -52,3 +52,9 @@ optionally add a timestamp to the file name.
 
 Customize `org-download-backend` to choose between `url-retrieve`
 (the default) or `wget` or `curl`.
+
+## Drag-and-drop to `dired`
+
+```elisp
+(add-hook 'dired-mode-hook 'org-download-enable)
+```
