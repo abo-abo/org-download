@@ -137,6 +137,8 @@ will be used."
           (const :tag "scrot" "scrot -s %s")
           (const :tag "gm" "gm import %s")
           (const :tag "imagemagick/import" "import %s")
+          ;; screenshot method in ms-windows, /capture=4 stands for interactive.
+          (const :tag "IrfanView" "i_view64 /capture=4 /convert=\"%s\"")
           ;; screenshot script in osx, -i stands for interactive,
           ;; press space key to toggle between selection and
           ;; window/application mode.
