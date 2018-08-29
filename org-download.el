@@ -399,7 +399,9 @@ It's inserted before the image link and is used to annotate it.")
     (if (= org-download-image-latex-width 0)
         ""
       (format "#+attr_latex: :width %dcm\n" org-download-image-latex-width))
-    (format org-download-link-format (file-relative-name filename (file-name-directory (buffer-name))))))
+    (format org-download-link-format
+            (org-link-escape
+             (file-relative-name filename (file-name-directory (buffer-name)))))))
   (org-display-inline-images))
 
 (defun org-download--at-comment-p ()
