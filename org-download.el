@@ -164,6 +164,11 @@ will be used."
   :type 'integer
   :group 'org-download)
 
+(defcustom org-download-image-org-width 0
+  "When non-zero add #+attr_org: :width tag to the image."
+  :type 'integer
+  :group 'org-download)
+
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
   (save-excursion
@@ -399,6 +404,9 @@ It's inserted before the image link and is used to annotate it.")
     (if (= org-download-image-latex-width 0)
         ""
       (format "#+attr_latex: :width %dcm\n" org-download-image-latex-width))
+    (if (= org-download-image-org-width 0)
+        ""
+      (format "#+attr_org: :width %dpx\n" org-download-image-org-width))
     (format org-download-link-format
             (org-link-escape
              (file-relative-name filename (file-name-directory (buffer-name)))))))
