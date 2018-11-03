@@ -293,8 +293,11 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
   "Capture screenshot and insert the resulting file.
 The screenshot tool is determined by `org-download-screenshot-method'."
   (interactive)
+  (setq temp default-directory)
+  (setq default-directory "~")
   (shell-command (format org-download-screenshot-method
                          org-download-screenshot-file))
+  (setq default-directory temp)
   (org-download-image org-download-screenshot-file))
 
 (declare-function org-attach-dir "org-attach")
