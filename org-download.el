@@ -285,9 +285,13 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
    nil t))
 
 (defun org-download-yank ()
-  "Call `org-download-image' with current kill."
+  "Call `org-download-image' with current kill.
+Trim newline if current kill contains one"
   (interactive)
-  (org-download-image (current-kill 0)))
+  (org-download-image
+   (if (string-match-p "\n$" (current-kill 0))
+       (replace-regexp-in-string "\n$" ""  (current-kill 0))
+     (current-kill 0))))
 
 (defun org-download-screenshot ()
   "Capture screenshot and insert the resulting file.
