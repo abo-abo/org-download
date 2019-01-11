@@ -287,7 +287,8 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
 (defun org-download-yank ()
   "Call `org-download-image' with current kill."
   (interactive)
-  (org-download-image (current-kill 0)))
+  (org-download-image
+   (replace-regexp-in-string "\n+$" "" (current-kill 0))))
 
 (defun org-download-screenshot ()
   "Capture screenshot and insert the resulting file.
