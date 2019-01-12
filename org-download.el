@@ -169,6 +169,10 @@ will be used."
   :type 'integer
   :group 'org-download)
 
+(defcustom org-download-delete-image-after-download nil
+  "When non-nil delete local image after download."
+  :group 'org-download)
+
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
   (save-excursion
@@ -353,6 +357,9 @@ It's inserted before the image link and is used to annotate it.")
         (org-download--image link filename)
         (when (eq org-download-method 'attach)
           (org-attach-attach filename nil 'none))
+        (when (and (eq org-download-delete-image-after-download t)
+                   (not (url-handler-file-remote-p (current-kill 0))))
+          (delete-file link delete-by-moving-to-trash))
         (org-download-insert-link link filename)))))
 
 (defun org-download-rename-at-point ()
