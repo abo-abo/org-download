@@ -86,16 +86,14 @@
   :type '(choice
           (const :tag "Directory" directory)
           (const :tag "Attachment" attach)
-          (function :tag "Custom function"))
-  :group 'org-download)
+          (function :tag "Custom function")))
 
 (defcustom org-download-image-dir nil
   "If set, images will be stored in this directory instead of \".\".
 See `org-download--dir-1' for more info."
   :type '(choice
           (const :tag "Default" nil)
-          (string :tag "Directory"))
-  :group 'org-download)
+          (string :tag "Directory")))
 (make-variable-buffer-local 'org-download-image-dir)
 
 (defcustom org-download-heading-lvl 0
@@ -112,14 +110,12 @@ See `org-download-rename-last-file'.")
   :type '(choice
           (const :tag "wget" "wget \"%s\" -O \"%s\"")
           (const :tag "curl" "curl \"%s\" -o \"%s\"")
-          (const :tag "url-retrieve" t))
-  :group 'org-download)
+          (const :tag "url-retrieve" t)))
 
 (defcustom org-download-timestamp "_%Y-%m-%d_%H-%M-%S"
   "This `format-time-string'-style string will be appended to the file name.
 Set this to \"\" if you don't want time stamps."
-  :type 'string
-  :group 'org-download)
+  :type 'string)
 
 (defcustom org-download-img-regex-list
   '("<img +src=\"" "<img +\\(class=\"[^\"]+\"\\)? *src=\"")
@@ -127,8 +123,7 @@ Set this to \"\" if you don't want time stamps."
 The html to which the links points will be searched for these
 regexes, one by one, until one succeeds.  The found image address
 will be used."
-  :type '(repeat string)
-  :group 'org-download)
+  :type '(repeat string))
 
 (defcustom org-download-screenshot-method "gnome-screenshot -a -f %s"
   "The tool to capture screenshots."
@@ -147,8 +142,7 @@ will be used."
           (const :tag "xclip"
            "xclip -selection clipboard -t image/png -o > %s")
           ;; take an image that is already on the clipboard, for Windows
-          (const :tag "imagemagick/convert" "convert clipboard: %s"))
-  :group 'org-download)
+          (const :tag "imagemagick/convert" "convert clipboard: %s")))
 
 (defcustom org-download-screenshot-file "/tmp/screenshot.png"
   "The file to capture screenshots."
@@ -156,22 +150,19 @@ will be used."
 
 (defcustom org-download-image-html-width 0
   "When non-zero add #+attr_html: :width tag to the image."
-  :type 'integer
-  :group 'org-download)
+  :type 'integer)
 
 (defcustom org-download-image-latex-width 0
   "When non-zero add #+attr_latex: :width tag to the image."
-  :type 'integer
-  :group 'org-download)
+  :type 'integer)
 
 (defcustom org-download-image-org-width 0
   "When non-zero add #+attr_org: :width tag to the image."
-  :type 'integer
-  :group 'org-download)
+  :type 'integer)
 
 (defcustom org-download-delete-image-after-download nil
   "When non-nil delete local image after download."
-  :group 'org-download)
+  :type 'boolean)
 
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
