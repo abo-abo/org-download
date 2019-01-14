@@ -390,7 +390,7 @@ It's inserted before the image link and is used to annotate it.")
       (replace-match newpath))))
 
 (defcustom org-download-abbreviate-filename-function #'file-relative-name
-  "Function that takes FILENAME and DIRECTORY and returns an abbreviated file name."
+  "Function that takes FILENAME and returns an abbreviated file name."
   :type '(choice
           (const :tag "relative" file-relative-name)
           (const :tag "absolute" expand-file-name)))
@@ -413,8 +413,7 @@ It's inserted before the image link and is used to annotate it.")
   (insert
    (format org-download-link-format
            (org-link-escape
-            (funcall org-download-abbreviate-filename-function
-                     filename (file-name-directory (buffer-name))))))
+            (funcall org-download-abbreviate-filename-function filename))))
   (org-display-inline-images))
 
 (defun org-download--at-comment-p ()
