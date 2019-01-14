@@ -396,25 +396,27 @@ It's inserted before the image link and is used to annotate it.")
           (const :tag "absolute" expand-file-name)))
 
 (defun org-download-insert-link (link filename)
-  (if (looking-back "^[ \t]+" (line-beginning-position))
-      (delete-region (match-beginning 0) (match-end 0))
-    (newline))
-  (insert (funcall org-download-annotate-function link))
-  (insert "\n")
-  (insert (if (= org-download-image-html-width 0)
-              ""
-            (format "#+attr_html: :width %dpx\n" org-download-image-html-width)))
-  (insert (if (= org-download-image-latex-width 0)
-              ""
-            (format "#+attr_latex: :width %dcm\n" org-download-image-latex-width)))
-  (insert (if (= org-download-image-org-width 0)
-              ""
-            (format "#+attr_org: :width %dpx\n" org-download-image-org-width)))
-  (insert
-   (format org-download-link-format
-           (org-link-escape
-            (funcall org-download-abbreviate-filename-function filename))))
-  (org-display-inline-images))
+  (let ((beg (point)))
+    (if (looking-back "^[ \t]+" (line-beginning-position))
+        (delete-region (match-beginning 0) (match-end 0))
+      (newline))
+    (insert (funcall org-download-annotate-function link))
+    (insert "\n")
+    (insert (if (= org-download-image-html-width 0)
+                ""
+              (format "#+attr_html: :width %dpx\n" org-download-image-html-width)))
+    (insert (if (= org-download-image-latex-width 0)
+                ""
+              (format "#+attr_latex: :width %dcm\n" org-download-image-latex-width)))
+    (insert (if (= org-download-image-org-width 0)
+                ""
+              (format "#+attr_org: :width %dpx\n" org-download-image-org-width)))
+    (insert
+     (format org-download-link-format
+             (org-link-escape
+              (funcall org-download-abbreviate-filename-function filename))))
+    (org-display-inline-images)
+    (buffer-substring-no-properties beg (point))))
 
 (defun org-download--at-comment-p ()
   "Check if current line begins with #+DOWLOADED:."
