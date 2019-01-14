@@ -389,26 +389,32 @@ It's inserted before the image link and is used to annotate it.")
     (while (re-search-forward oldpath nil t)
       (replace-match newpath))))
 
+(defcustom org-download-abbreviate-filename-function #'file-relative-name
+  "Function that takes FILENAME and DIRECTORY and returns an abbreviated file name."
+  :type '(choice
+          (const :tag "relative" file-relative-name)
+          (const :tag "absolute" expand-file-name)))
+
 (defun org-download-insert-link (link filename)
   (if (looking-back "^[ \t]+" (line-beginning-position))
       (delete-region (match-beginning 0) (match-end 0))
     (newline))
+  (insert (funcall org-download-annotate-function link))
+  (insert "\n")
+  (insert (if (= org-download-image-html-width 0)
+              ""
+            (format "#+attr_html: :width %dpx\n" org-download-image-html-width)))
+  (insert (if (= org-download-image-latex-width 0)
+              ""
+            (format "#+attr_latex: :width %dcm\n" org-download-image-latex-width)))
+  (insert (if (= org-download-image-org-width 0)
+              ""
+            (format "#+attr_org: :width %dpx\n" org-download-image-org-width)))
   (insert
-   (concat
-    (funcall org-download-annotate-function link)
-    "\n"
-    (if (= org-download-image-html-width 0)
-        ""
-      (format "#+attr_html: :width %dpx\n" org-download-image-html-width))
-    (if (= org-download-image-latex-width 0)
-        ""
-      (format "#+attr_latex: :width %dcm\n" org-download-image-latex-width))
-    (if (= org-download-image-org-width 0)
-        ""
-      (format "#+attr_org: :width %dpx\n" org-download-image-org-width))
-    (format org-download-link-format
-            (org-link-escape
-             (file-relative-name filename (file-name-directory (buffer-name)))))))
+   (format org-download-link-format
+           (org-link-escape
+            (funcall org-download-abbreviate-filename-function
+                     filename (file-name-directory (buffer-name))))))
   (org-display-inline-images))
 
 (defun org-download--at-comment-p ()
