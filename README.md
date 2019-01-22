@@ -1,3 +1,8 @@
+# org-download
+
+[![MELPA](https://melpa.org/packages/org-download-badge.svg)](https://melpa.org/#/org-download)
+[![MELPA Stable](https://stable.melpa.org/packages/org-download-badge.svg)](https://stable.melpa.org/#/org-download)
+
 This extension facilitates moving images from point **A** to point **B**.
 
 Point **A** (*the source*) can be:
