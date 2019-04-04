@@ -172,7 +172,9 @@ will be used."
           (progn
             (unless (= cur-lvl 1)
               (org-up-heading-all (- (1- (org-current-level)) lvl)))
-            (nth 4 (org-heading-components)))
+            (replace-regexp-in-string
+             " " "_"
+             (nth 4 (org-heading-components))))
         ""))))
 
 (defun org-download--dir-1 ()
@@ -184,9 +186,9 @@ It's `org-download-image-dir', unless it's nil.  Then it's \".\"."
   "Return the second part of the directory path for `org-download--dir'.
 Unless `org-download-heading-lvl' is nil, it's the name of the current
 `org-download-heading-lvl'-leveled heading.  Otherwise it's \"\"."
-  (and org-download-heading-lvl
-       (org-download-get-heading
-        org-download-heading-lvl)))
+  (when org-download-heading-lvl
+    (org-download-get-heading
+     org-download-heading-lvl)))
 
 (defun org-download--dir ()
   "Return the directory path for image storage.
