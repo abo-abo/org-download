@@ -164,6 +164,14 @@ will be used."
   "When non-nil delete local image after download."
   :type 'boolean)
 
+(defcustom org-download-display-inline-images t
+  "When non-nil display inline images in org buffer after download."
+  :type 'boolean)
+
+(defun org-download--display-inline-images ()
+  (when org-download-display-inline-images
+    (org-display-inline-images)))
+
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
   (save-excursion
@@ -251,7 +259,7 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
    (lexical-let ((cur-buf (current-buffer)))
      (lambda (x)
        (with-current-buffer cur-buf
-         (org-display-inline-images))))))
+         (org-download--display-inline-images))))))
 
 (defun org-download--write-image (status filename)
   ;; Write current buffer to FILENAME
@@ -275,7 +283,7 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
    (lambda (status filename buffer)
      (org-download--write-image status filename)
      (with-current-buffer buffer
-       (org-display-inline-images)))
+       (org-download--display-inline-images)))
    (list
     (expand-file-name filename)
     (current-buffer))
@@ -383,7 +391,7 @@ It's inserted before the image link and is used to annotate it.")
        (file-name-nondirectory org-download-path-last-file)
        (concat newname "." ext))
       (setq org-download-path-last-file newpath)
-      (org-display-inline-images))))
+      (org-download--display-inline-images))))
 
 (defun org-download-replace-all (oldpath newpath)
   "Function to search for the OLDPATH inside the buffer and replace it by the NEWPATH."
@@ -418,7 +426,7 @@ It's inserted before the image link and is used to annotate it.")
      (format org-download-link-format
              (org-link-escape
               (funcall org-download-abbreviate-filename-function filename))))
-    (org-display-inline-images)
+    (org-download--display-inline-images)
     (buffer-substring-no-properties beg (point))))
 
 (defun org-download--at-comment-p ()
