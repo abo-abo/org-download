@@ -177,9 +177,51 @@ For example:
   "When non-nil display inline images in org buffer after download."
   :type 'boolean)
 
+(defvar org-download-posframe-show-params
+  '(;; Please do not remove :timeout or set it to large.
+    :timeout 1
+    :internal-border-width 1
+    :internal-border-color "red"
+    :min-width 40
+    :min-height 10
+    :poshandler posframe-poshandler-window-center)
+  "List of parameters passed to `posframe-show'.")
+
+(defcustom org-download-thumbnail-file
+  (expand-file-name "org-download-thumbnail.png" temporary-file-directory)
+  "The file to thumbnail of `org-download-path-last-file'."
+  :type 'file)
+
+(defcustom org-download-thumbnail-function
+  #'org-download-thumbnail-default
+  "The tool to create screenshot's thumbnail."
+  :type 'function)
+
+(defun org-download-thumbnail-default (image-file thumbnail-file)
+  "Create the THUMBNAIL of IMAGE"
+  (cond
+   ((executable-find "convert")
+    (shell-command-to-string (format "convert -resize 400 %s %s"
+                                     image-file thumbnail-file)))
+   (t
+    (message "org-download: fail to create thumbnail, use original image instead.")
+    (copy-file image-file thumbnail-file t))))
+
 (defun org-download--display-inline-images ()
-  (when org-download-display-inline-images
-    (org-display-inline-images)))
+  (if org-download-display-inline-images
+      (org-display-inline-images)
+    (require 'posframe)
+    (when (posframe-workable-p)
+      (let ((buffer (get-buffer-create " *org-download-image")))
+        (funcall org-download-thumbnail-function
+                 org-download-path-last-file
+                 org-download-thumbnail-file)
+        (with-current-buffer buffer
+          (erase-buffer)
+          (insert-image-file org-download-thumbnail-file))
+        (apply #'posframe-show
+               buffer
+               org-download-posframe-show-params)))))
 
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
