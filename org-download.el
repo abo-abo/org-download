@@ -300,6 +300,7 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
 The screenshot tool is determined by `org-download-screenshot-method'."
   (interactive)
   (let ((default-directory "~"))
+    (make-directory (file-name-directory org-download-screenshot-file) t)
     (shell-command (format org-download-screenshot-method
                            org-download-screenshot-file)))
   (org-download-image org-download-screenshot-file))
