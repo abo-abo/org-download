@@ -144,7 +144,7 @@ will be used."
           ;; take an image that is already on the clipboard, for Windows
           (const :tag "imagemagick/convert" "convert clipboard: %s")))
 
-(defcustom org-download-screenshot-file "/tmp/screenshot.png"
+(defcustom org-download-screenshot-file (concat temporary-file-directory "screenshot.png")
   "The file to capture screenshots."
   :type 'string)
 
