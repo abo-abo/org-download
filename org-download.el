@@ -140,9 +140,10 @@ will be used."
           (const :tag "screencapture" "screencapture -i %s")
           ;; take an image that is already on the clipboard, for Linux
           (const :tag "xclip"
-           "xclip -selection clipboard -t image/png -o > %s")
+                 "xclip -selection clipboard -t image/png -o > %s")
           ;; take an image that is already on the clipboard, for Windows
-          (const :tag "imagemagick/convert" "convert clipboard: %s")))
+          (const :tag "imagemagick/convert" "convert clipboard: %s")
+          (function :tag "Custom function")))
 
 (defcustom org-download-screenshot-file (expand-file-name "screenshot.png" temporary-file-directory)
   "The file to capture screenshots."
@@ -301,8 +302,11 @@ The screenshot tool is determined by `org-download-screenshot-method'."
   (interactive)
   (let ((default-directory "~"))
     (make-directory (file-name-directory org-download-screenshot-file) t)
-    (shell-command (format org-download-screenshot-method
-                           org-download-screenshot-file)))
+    (if (functionp org-download-screenshot-method)
+        (funcall org-download-screenshot-method
+                 org-download-screenshot-file)
+      (shell-command (format org-download-screenshot-method
+                             org-download-screenshot-file))))
   (org-download-image org-download-screenshot-file))
 
 (declare-function org-attach-dir "org-attach")
