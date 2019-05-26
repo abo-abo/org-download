@@ -170,7 +170,7 @@ will be used."
   :type 'boolean)
 
 (defcustom org-download-posframe-show-params
-  '(;; Please do not remove :timeout or set it to 0
+  '(;; Please do not remove :timeout or set it to large.
     :timeout 1
     :internal-border-width 1
     :internal-border-color "red"
