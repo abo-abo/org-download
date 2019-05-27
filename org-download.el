@@ -173,6 +173,8 @@ will be used."
     :timeout 1
     :internal-border-width 1
     :internal-border-color "red"
+    :min-width 40
+    :min-height 10
     :poshandler posframe-poshandler-window-center)
   "List of parameters passed to `posframe-show'.")
 
@@ -207,7 +209,6 @@ will be used."
                  org-download-thumbnail-file)
         (with-current-buffer buffer
           (erase-buffer)
-          (insert " ")
           (insert-image-file org-download-thumbnail-file))
         (apply #'posframe-show
                buffer
