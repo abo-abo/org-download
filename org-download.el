@@ -75,7 +75,6 @@
 (require 'url-parse)
 (require 'url-http)
 (require 'org)
-(require 'posframe nil t)
 
 (defgroup org-download nil
   "Image drag-and-drop for org-mode."
@@ -200,8 +199,8 @@ will be used."
 (defun org-download--display-inline-images ()
   (if org-download-display-inline-images
       (org-display-inline-images)
-    (when (and (featurep 'posframe)
-               (posframe-workable-p))
+    (require 'posframe)
+    (when (posframe-workable-p)
       (let ((buffer (get-buffer-create " *org-download-image")))
         (funcall org-download-thumbnail-function
                  org-download-path-last-file
