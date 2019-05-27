@@ -190,8 +190,8 @@ will be used."
   "Create the THUMBNAIL of IMAGE"
   (cond
    ((executable-find "convert")
-    (shell-command (format "convert -resize 400 %s %s"
-                           image-file thumbnail-file)))
+    (shell-command-to-string (format "convert -resize 400 %s %s"
+                                     image-file thumbnail-file)))
    (t
     (message "org-download: fail to create thumbnail, use original image instead.")
     (copy-file image-file thumbnail-file))))
