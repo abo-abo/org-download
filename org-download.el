@@ -196,7 +196,7 @@ will be used."
                                      image-file thumbnail-file)))
    (t
     (message "org-download: fail to create thumbnail, use original image instead.")
-    (copy-file image-file thumbnail-file))))
+    (copy-file image-file thumbnail-file t))))
 
 (defun org-download--display-inline-images ()
   (if org-download-display-inline-images
