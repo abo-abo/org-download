@@ -412,8 +412,12 @@ It's inserted before the image link and is used to annotate it.")
           (const :tag "absolute" expand-file-name)))
 
 (defun org-download-insert-link (link filename)
-  (let ((beg (point)))
-    (if (looking-back "^[ \t]+" (line-beginning-position))
+  (let* ((beg (point))
+         (line-beg (line-beginning-position))
+         (indent (- beg line-beg))
+         (in-item-p (org-in-item-p))
+         str)
+    (if (looking-back "^[ \t]+" line-beg)
         (delete-region (match-beginning 0) (match-end 0))
       (newline))
     (insert (funcall org-download-annotate-function link))
@@ -432,7 +436,10 @@ It's inserted before the image link and is used to annotate it.")
              (org-link-escape
               (funcall org-download-abbreviate-filename-function filename))))
     (org-download--display-inline-images)
-    (buffer-substring-no-properties beg (point))))
+    (setq str (buffer-substring-no-properties line-beg (point)))
+    (when in-item-p
+      (indent-region line-beg (point) indent))
+    str))
 
 (defun org-download--at-comment-p ()
   "Check if current line begins with #+DOWLOADED:."
