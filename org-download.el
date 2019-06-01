@@ -161,6 +161,14 @@ will be used."
   "When non-zero add #+attr_org: :width tag to the image."
   :type 'integer)
 
+(defcustom org-download-image-attr-list nil
+  "Add attr info to the image.
+For example:
+
+  (\"#+attr_html: :width 80% :align center\"
+   \"#+attr_org: :width 100px\")"
+  :type '(repeat string))
+
 (defcustom org-download-delete-image-after-download nil
   "When non-nil delete local image after download."
   :type 'boolean)
@@ -418,6 +426,10 @@ It's inserted before the image link and is used to annotate it.")
       (newline))
     (insert (funcall org-download-annotate-function link))
     (insert "\n")
+    (dolist (attr org-download-image-attr-list)
+      (when (stringp attr)
+        (insert (replace-regexp-in-string "\n+$" "" attr))
+        (insert "\n")))
     (insert (if (= org-download-image-html-width 0)
                 ""
               (format "#+attr_html: :width %dpx\n" org-download-image-html-width)))
