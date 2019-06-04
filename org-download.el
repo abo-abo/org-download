@@ -175,7 +175,11 @@ For example:
 
 (defcustom org-download-display-inline-images t
   "When non-nil display inline images in org buffer after download."
-  :type 'boolean)
+  :type
+  '(choice
+    (const :tag "On" t)
+    (const :tag "Off" nil)
+    (const :tag "Posframe" posframe)))
 
 (defvar org-download-posframe-show-params
   '(;; Please do not remove :timeout or set it to large.
@@ -208,20 +212,22 @@ For example:
     (copy-file image-file thumbnail-file t))))
 
 (defun org-download--display-inline-images ()
-  (if org-download-display-inline-images
-      (org-display-inline-images)
-    (require 'posframe)
-    (when (posframe-workable-p)
-      (let ((buffer (get-buffer-create " *org-download-image")))
-        (funcall org-download-thumbnail-function
-                 org-download-path-last-file
-                 org-download-thumbnail-file)
-        (with-current-buffer buffer
-          (erase-buffer)
-          (insert-image-file org-download-thumbnail-file))
-        (apply #'posframe-show
-               buffer
-               org-download-posframe-show-params)))))
+  (cond
+    ((eq org-download-display-inline-images t)
+     (org-display-inline-images))
+    ((eq org-download-display-inline-images 'posframe)
+     (require 'posframe)
+     (when (posframe-workable-p)
+       (let ((buffer (get-buffer-create " *org-download-image")))
+         (funcall org-download-thumbnail-function
+                  org-download-path-last-file
+                  org-download-thumbnail-file)
+         (with-current-buffer buffer
+           (erase-buffer)
+           (insert-image-file org-download-thumbnail-file))
+         (apply #'posframe-show
+                buffer
+                org-download-posframe-show-params))))))
 
 (defun org-download-get-heading (lvl)
   "Return the heading of the current entry's LVL level parent."
