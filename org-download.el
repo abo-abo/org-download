@@ -211,6 +211,9 @@ For example:
     (message "org-download: fail to create thumbnail, use original image instead.")
     (copy-file image-file thumbnail-file t))))
 
+(declare-function posframe-workable-p "ext:posframe")
+(declare-function posframe-show "ext:posframe")
+
 (defun org-download--display-inline-images ()
   (cond
     ((eq org-download-display-inline-images t)
