@@ -243,14 +243,16 @@ Unless `org-download-heading-lvl' is nil, it's the name of the current
 
 The path is composed from `org-download--dir-1' and `org-download--dir-2'.
 The directory is created if it didn't exist before."
-  (let* ((part1 (org-download--dir-1))
-         (part2 (org-download--dir-2))
-         (dir (if part2
-                  (format "%s/%s" part1 part2)
-                part1)))
-    (unless (file-exists-p dir)
-      (make-directory dir t))
-    dir))
+  (if (eq major-mode 'org-mode)
+      (let* ((part1 (org-download--dir-1))
+             (part2 (org-download--dir-2))
+             (dir (if part2
+                      (format "%s/%s" part1 part2)
+                    part1)))
+        (unless (file-exists-p dir)
+          (make-directory dir t))
+        dir)
+    default-directory))
 
 (defun org-download--fullname (link &optional ext)
   "Return the file name where LINK will be saved to.
@@ -344,8 +346,9 @@ The screenshot tool is determined by `org-download-screenshot-method'."
     (if (functionp org-download-screenshot-method)
         (funcall org-download-screenshot-method
                  org-download-screenshot-file)
-      (shell-command (format org-download-screenshot-method
-                             org-download-screenshot-file))))
+      (shell-command-to-string
+       (format org-download-screenshot-method
+               org-download-screenshot-file))))
   (org-download-image org-download-screenshot-file))
 
 (declare-function org-attach-dir "org-attach")
@@ -401,12 +404,15 @@ It's inserted before the image link and is used to annotate it.")
       (setq org-download-path-last-file filename)
       (when (image-type-from-file-name filename)
         (org-download--image link filename)
-        (when (eq org-download-method 'attach)
-          (org-attach-attach filename nil 'none))
+        (if (eq major-mode 'org-mode)
+            (progn
+              (when (eq org-download-method 'attach)
+                (org-attach-attach filename nil 'none))
+              (org-download-insert-link link filename))
+          (message "%s" filename))
         (when (and (eq org-download-delete-image-after-download t)
                    (not (url-handler-file-remote-p (current-kill 0))))
-          (delete-file link delete-by-moving-to-trash))
-        (org-download-insert-link link filename)))))
+          (delete-file link delete-by-moving-to-trash))))))
 
 (defun org-download-rename-at-point ()
   "Rename image at point."
