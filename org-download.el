@@ -134,6 +134,7 @@ will be used."
           (const :tag "imagemagick/import" "import %s")
           (const :tag "imagemagick/import + xclip to save to clipboard"
            "export filename=\"%s\"; import png:\"$filename\" ;xclip -selection clipboard -target image/png -filter < \"$filename\" &>/dev/null")
+          (const :tag "xfce4-screenshooter" "xfce4-screenshooter -r -o cat > %s")
           ;; screenshot method in ms-windows, /capture=4 stands for interactive.
           (const :tag "IrfanView" "i_view64 /capture=4 /convert=\"%s\"")
           ;; screenshot script in osx, -i stands for interactive,
