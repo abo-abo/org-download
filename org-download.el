@@ -358,7 +358,9 @@ The screenshot tool is determined by `org-download-screenshot-method'."
 (defun org-download-annotate-default (link)
   "Annotate LINK with the time of download."
   (format "#+DOWNLOADED: %s @ %s\n"
-          link
+          (if (equal link org-download-screenshot-file)
+              "screenshot"
+            link)
           (format-time-string "%Y-%m-%d %H:%M:%S")))
 
 (defvar org-download-annotate-function
