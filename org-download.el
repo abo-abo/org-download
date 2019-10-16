@@ -322,16 +322,22 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
 
 (defun org-download--image/url-retrieve (link filename)
   "Save LINK to FILENAME using `url-retrieve'."
-  (url-retrieve
-   link
-   (lambda (status filename buffer)
-     (org-download--write-image status filename)
-     (with-current-buffer buffer
-       (org-download--display-inline-images)))
-   (list
-    (expand-file-name filename)
-    (current-buffer))
-   nil t))
+  (let ((mode major-mode))
+    (url-retrieve
+     link
+     (lambda (status filename buffer)
+       (org-download--write-image status filename)
+       (cond ((eq mode 'org-mode)
+              (with-current-buffer buffer
+                (org-download--display-inline-images)))
+             ((eq mode 'dired-mode)
+              (let ((inhibit-message t))
+                (with-current-buffer (dired (file-name-directory filename))
+                  (revert-buffer nil t))))))
+     (list
+      (expand-file-name filename)
+      (current-buffer))
+     nil t)))
 
 (defun org-download-yank ()
   "Call `org-download-image' with current kill."
@@ -584,21 +590,7 @@ Otherwise, pass URI and ACTION back to dnd dispatch."
 (defun org-download-dired (uri)
   "Download URI to current directory."
   (raise-frame)
-  (let ((filename (file-name-nondirectory
-                   (car (url-path-and-query
-                         (url-generic-parse-url uri))))))
-    (message "Downloading %s to %s ..."
-             filename
-             (expand-file-name filename))
-    (url-retrieve
-     uri
-     (lambda (status filename)
-       (org-download--write-image status filename)
-       (dired (file-name-directory filename))
-       (revert-buffer))
-     (list
-      (expand-file-name filename))
-     t t)))
+  (org-download-image uri))
 
 (defun org-download-dnd-base64 (uri _action)
   (when (eq major-mode 'org-mode)
