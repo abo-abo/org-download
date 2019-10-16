@@ -1,6 +1,6 @@
-;;; org-download.el --- Image drag-and-drop for Emacs org-mode
+;;; org-download.el --- Image drag-and-drop for Emacs org-mode. -*- lexical-binding: t -*-
 
-;; Copyright (C) 2014 Free Software Foundation, Inc.
+;; Copyright (C) 2014-2019 Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel
 ;; URL: https://github.com/abo-abo/org-download
@@ -112,7 +112,7 @@ See `org-download-rename-last-file'.")
           (const :tag "curl" "curl \"%s\" -o \"%s\"")
           (const :tag "url-retrieve" t)))
 
-(defcustom org-download-timestamp "_%Y-%m-%d_%H-%M-%S"
+(defcustom org-download-timestamp "%Y-%m-%d_%H-%M-%S_"
   "This `format-time-string'-style string will be appended to the file name.
 Set this to \"\" if you don't want time stamps."
   :type 'string)
@@ -254,6 +254,8 @@ The directory is created if it didn't exist before."
         dir)
     default-directory))
 
+(defvar org-download-file-format-function #'org-download-file-format-default)
+
 (defun org-download--fullname (link &optional ext)
   "Return the file name where LINK will be saved to.
 
@@ -266,18 +268,18 @@ EXT can hold the file extension, in case LINK doesn't provide it."
         (dir (org-download--dir)))
     (when (string-match ".*?\\.\\(?:png\\|jpg\\)\\(.*\\)$" filename)
       (setq filename (replace-match "" nil nil filename 1)))
+    (when ext
+      (setq filename (concat filename "." ext)))
     (abbreviate-file-name
      (expand-file-name
-      (org-download--fullname-format filename ext)
+      (funcall org-download-file-format-function filename)
       dir))))
 
-(defun org-download--fullname-format (filename &optional ext)
-  "It's affected by `org-download-timestamp'.
-EXT can hold the file extension, in case FILENAME doesn't provide it."
-  (format "%s%s.%s"
-          (file-name-sans-extension filename)
-          (format-time-string org-download-timestamp)
-          (or ext (file-name-extension filename))))
+(defun org-download-file-format-default (filename)
+  "It's affected by `org-download-timestamp'."
+  (concat
+   (format-time-string org-download-timestamp)
+   filename))
 
 (defun org-download--image (link filename)
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
@@ -299,7 +301,7 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
                 ,(format command link
                          (expand-file-name filename))))
    (lexical-let ((cur-buf (current-buffer)))
-     (lambda (x)
+     (lambda (_x)
        (with-current-buffer cur-buf
          (org-download--display-inline-images))))))
 
@@ -598,7 +600,7 @@ Otherwise, pass URI and ACTION back to dnd dispatch."
       (expand-file-name filename))
      t t)))
 
-(defun org-download-dnd-base64 (uri action)
+(defun org-download-dnd-base64 (uri _action)
   (when (eq major-mode 'org-mode)
     (when (string-match "^data:image/png;base64," uri)
       (let* ((me (match-end 0))
