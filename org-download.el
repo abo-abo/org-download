@@ -247,7 +247,7 @@ The directory is created if it didn't exist before."
       (let* ((part1 (org-download--dir-1))
              (part2 (org-download--dir-2))
              (dir (if part2
-                      (format "%s/%s" part1 part2)
+                      (expand-file-name part2 part1)
                     part1)))
         (unless (file-exists-p dir)
           (make-directory dir t))
