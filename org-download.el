@@ -1,12 +1,12 @@
-;;; org-download.el --- Image drag-and-drop for Emacs org-mode. -*- lexical-binding: t -*-
+;;; org-download.el --- Image drag-and-drop for Org-mode. -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2014-2019 Free Software Foundation, Inc.
 
 ;; Author: Oleh Krehel
 ;; URL: https://github.com/abo-abo/org-download
 ;; Version: 0.1.0
-;; Package-Requires: ((async "1.2"))
-;; Keywords: images, screenshots, download
+;; Package-Requires: ((emacs "24.3") (async "1.2"))
+;; Keywords: multimedia images screenshots download
 
 ;; This file is not part of GNU Emacs.
 
@@ -306,7 +306,7 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
          (org-download--display-inline-images))))))
 
 (defun org-download--write-image (status filename)
-  ;; Write current buffer to FILENAME
+  "Write current buffer STATUS to FILENAME."
   (let ((err (plist-get status :error)))
     (when err
       (error
@@ -400,7 +400,7 @@ It's inserted before the image link and is used to annotate it.")
                  (when (re-search-forward "^Content-Type: image/\\(.*\\)$")
                    (setq ext (match-string 1)))))
               (t
-               (error "link %s does not point to an image; unaliasing failed" link)))))
+               (error "Link %s does not point to an image; unaliasing failed" link)))))
     (let ((filename
            (cond ((eq org-download-method 'attach)
                   (let ((org-download-image-dir (progn (require 'org-attach)
@@ -540,7 +540,7 @@ It's inserted before the image link and is used to annotate it.")
   (interactive)
   (let ((context (org-element-context)))
     (if (not (eq (car-safe context) 'link))
-        (user-error "not on a link")
+        (user-error "Not on a link")
       (start-process-shell-command
        "org-download-edit"
        "org-download-edit"
