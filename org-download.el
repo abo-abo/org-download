@@ -69,8 +69,7 @@
 ;;; Code:
 
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 (require 'async)
 (require 'url-parse)
 (require 'url-http)
@@ -300,7 +299,7 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
    `(lambda () (shell-command
                 ,(format command link
                          (expand-file-name filename))))
-   (lexical-let ((cur-buf (current-buffer)))
+   (let ((cur-buf (current-buffer)))
      (lambda (_x)
        (with-current-buffer cur-buf
          (org-download--display-inline-images))))))
@@ -556,7 +555,7 @@ When TIMES isn't nil, delete only TIMES links."
     (setq times most-positive-fixnum))
   (save-excursion
     (goto-char beg)
-    (while (and (>= (decf times) 0)
+    (while (and (>= (cl-decf times) 0)
                 (re-search-forward "\\[\\[file:\\([^]]*\\)\\]\\]" end t))
       (let ((str (match-string-no-properties 1)))
         (delete-region beg
