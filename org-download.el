@@ -356,7 +356,9 @@ The screenshot tool is determined by `org-download-screenshot-method'."
       (shell-command-to-string
        (format org-download-screenshot-method
                org-download-screenshot-file))))
-  (org-download-image org-download-screenshot-file))
+  (when (file-exists-p org-download-screenshot-file)
+    (org-download-image org-download-screenshot-file)
+    (delete-file org-download-screenshot-file)))
 
 (declare-function org-attach-dir "org-attach")
 (declare-function org-attach-attach "org-attach")
