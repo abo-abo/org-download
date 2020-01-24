@@ -385,6 +385,12 @@ It's inserted before the image link and is used to annotate it.")
   "Function that takes FILENAME and returns a org link."
   :type 'function)
 
+(defcustom org-download-abbreviate-filename-function #'file-relative-name
+  "Function that takes FILENAME and returns an abbreviated file name."
+  :type '(choice
+          (const :tag "relative" file-relative-name)
+          (const :tag "absolute" expand-file-name)))
+
 (defun org-download-link-format-function-default (filename)
   "The default function of `org-download-link-format-function'."
   (if (and (>= (string-to-number org-version) 9.3)
@@ -474,12 +480,6 @@ It's inserted before the image link and is used to annotate it.")
     (while (re-search-forward oldpath nil t)
       (replace-match newpath))))
 
-(defcustom org-download-abbreviate-filename-function #'file-relative-name
-  "Function that takes FILENAME and returns an abbreviated file name."
-  :type '(choice
-          (const :tag "relative" file-relative-name)
-          (const :tag "absolute" expand-file-name)))
-
 (defun org-download-insert-link (link filename)
   (let* ((beg (point))
          (line-beg (line-beginning-position))
@@ -529,7 +529,7 @@ It's inserted before the image link and is used to annotate it.")
          (delete-region (region-beginning)
                         (region-end)))
 
-        ((looking-at org-any-link-re)
+        ((looking-at org-link-any-re)
          (let ((fname (org-link-unescape
                        (match-string-no-properties 2))))
            (when (file-exists-p fname)
