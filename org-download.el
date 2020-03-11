@@ -516,6 +516,8 @@ It's inserted before the image link and is used to annotate it.")
     (move-beginning-of-line nil)
     (looking-at "#\\+DOWNLOADED:")))
 
+(defvar org-link-any-re)
+
 (defun org-download-delete ()
   "Delete inline image link on current line, and the file that it points to."
   (interactive)
