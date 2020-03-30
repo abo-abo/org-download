@@ -129,6 +129,7 @@ will be used."
   :type '(choice
           (const :tag "gnome-screenshot" "gnome-screenshot -a -f %s")
           (const :tag "scrot" "scrot -s %s")
+          (const :tag "flameshot" "flameshot gui --raw > %s")
           (const :tag "gm" "gm import %s")
           (const :tag "imagemagick/import" "import %s")
           (const :tag "imagemagick/import + xclip to save to clipboard"
