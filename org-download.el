@@ -140,6 +140,8 @@ will be used."
           ;; press space key to toggle between selection and
           ;; window/application mode.
           (const :tag "screencapture" "screencapture -i %s")
+          ;; KDE screenshot application
+          (const :tag "spectacle" "spectacle -br -o %s")
           ;; take an image that is already on the clipboard, for Linux
           (const :tag "xclip"
            "xclip -selection clipboard -t image/png -o > %s")
