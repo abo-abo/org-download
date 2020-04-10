@@ -221,9 +221,12 @@ For example:
           (progn
             (unless (= cur-lvl 1)
               (org-up-heading-all (- (1- (org-current-level)) lvl)))
-            (replace-regexp-in-string
-             " " "_"
-             (nth 4 (org-heading-components))))
+            (let ((heading (nth 4 (org-heading-components))))
+              (if heading
+                  (replace-regexp-in-string
+                   " " "_"
+                   heading)
+                "")))
         ""))))
 
 (defun org-download--dir-1 ()
