@@ -287,6 +287,9 @@ EXT can hold the file extension, in case LINK doesn't provide it."
    (format-time-string org-download-timestamp)
    filename))
 
+(defvar org-download--file-content nil
+  "When non-nil, store the file name of an already downloaded file.")
+
 (defun org-download--image (link filename)
   "Save LINK to FILENAME asynchronously and show inline images in current buffer."
   (when (string= "file" (url-type (url-generic-parse-url link)))
@@ -294,6 +297,9 @@ EXT can hold the file extension, in case LINK doesn't provide it."
   (cond ((and (not (file-remote-p link))
               (file-exists-p link))
          (copy-file link (expand-file-name filename)))
+        (org-download--file-content
+         (copy-file org-download--file-content (expand-file-name filename))
+         (setq org-download--file-content nil))
         ((eq org-download-backend t)
          (org-download--image/url-retrieve link filename))
         (t
@@ -409,30 +415,44 @@ It's inserted before the image link and is used to annotate it.")
             (org-link-escape
              (funcall org-download-abbreviate-filename-function filename)))))
 
-(defun org-download--parse-link (link)
+(defun org-download--detect-ext (link buffer)
   (let (ext)
-    (cond ((image-type-from-file-name link)
-           (list link nil))
-          ((string-match "^file:///" link)
-           (list link nil))
-          (t
-           (with-current-buffer (url-retrieve-synchronously link t)
-             (cond ((let ((regexes org-download-img-regex-list)
-                          lnk)
-                      (while (and (not lnk) regexes)
-                        (goto-char (point-min))
-                        (when (re-search-forward (pop regexes) nil t)
-                          (backward-char)
-                          (setq lnk (read (current-buffer)))))
-                      (when lnk
-                        (setq link lnk))))
-                   ((progn
-                      (goto-char (point-min))
-                      (when (re-search-forward "^Content-Type: image/\\(.*\\)$")
-                        (setq ext (match-string 1)))))
-                   (t
-                    (error "Link %s does not point to an image; unaliasing failed" link))))
-           (list link ext)))))
+    (with-current-buffer buffer
+      (cond ((let ((regexes org-download-img-regex-list)
+                   lnk)
+               (while (and (not lnk) regexes)
+                 (goto-char (point-min))
+                 (when (re-search-forward (pop regexes) nil t)
+                   (backward-char)
+                   (setq lnk (read (current-buffer)))))
+               (when lnk
+                 (setq link lnk))))
+            ((progn
+               (goto-char (point-min))
+               (when (re-search-forward "^Content-Type: image/\\(.*\\)$" nil t)
+                 (setq ext (match-string 1)))))
+            ((progn
+               (goto-char (point-min))
+               (when (re-search-forward "^Content-Type: application/pdf" nil t)
+                 (setq ext "pdf"))
+               (re-search-forward "^%PDF")
+               (beginning-of-line)
+               (write-region
+                (point) (point-max)
+                (setq org-download--file-content "/tmp/org-download.pdf"))
+               t))
+            (t
+             (error "Link %s does not point to an image; unaliasing failed" link)))
+      (list link ext))))
+
+(defun org-download--parse-link (link)
+  (cond ((image-type-from-file-name link)
+         (list link nil))
+        ((string-match "^file:///" link)
+         (list link nil))
+        (t
+         (let ((buffer (url-retrieve-synchronously link t)))
+           (org-download--detect-ext link buffer)))))
 
 (defun org-download-image (link)
   "Save image at address LINK to `org-download--dir'."
