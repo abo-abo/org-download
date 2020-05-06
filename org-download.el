@@ -74,6 +74,7 @@
 (require 'url-parse)
 (require 'url-http)
 (require 'org)
+(require 'org-attach)
 
 (defgroup org-download nil
   "Image drag-and-drop for org-mode."
@@ -461,8 +462,7 @@ It's inserted before the image link and is used to annotate it.")
   (let* ((link-and-ext (org-download--parse-link link))
          (filename
           (cond ((eq org-download-method 'attach)
-                 (let ((org-download-image-dir (progn (require 'org-attach)
-                                                      (org-attach-dir t)))
+                 (let ((org-download-image-dir (org-attach-dir t))
                        org-download-heading-lvl)
                    (apply #'org-download--fullname link-and-ext)))
                 ((fboundp org-download-method)
