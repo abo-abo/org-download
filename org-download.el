@@ -202,6 +202,10 @@ For example:
 (declare-function posframe-workable-p "ext:posframe")
 (declare-function posframe-show "ext:posframe")
 
+(defun org-download-org-mode-p ()
+  "Return `t' if major-mode or derived-mode-p equals 'org-mode."
+  (or (eq major-mode 'org-mode) (derived-mode-p 'org-mode)))
+
 (defun org-download--display-inline-images ()
   (cond
    ((eq org-download-display-inline-images t)
@@ -251,7 +255,7 @@ Unless `org-download-heading-lvl' is nil, it's the name of the current
 
 The path is composed from `org-download--dir-1' and `org-download--dir-2'.
 The directory is created if it didn't exist before."
-  (if (eq major-mode 'org-mode)
+  (if (org-download-org-mode-p)
       (let* ((part1 (org-download--dir-1))
              (part2 (org-download--dir-2))
              (dir (if part2
@@ -336,22 +340,21 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
 
 (defun org-download--image/url-retrieve (link filename)
   "Save LINK to FILENAME using `url-retrieve'."
-  (let ((mode major-mode))
-    (url-retrieve
-     link
-     (lambda (status filename buffer)
-       (org-download--write-image status filename)
-       (cond ((eq mode 'org-mode)
-              (with-current-buffer buffer
-                (org-download--display-inline-images)))
-             ((eq mode 'dired-mode)
-              (let ((inhibit-message t))
-                (with-current-buffer (dired (file-name-directory filename))
-                  (revert-buffer nil t))))))
-     (list
-      (expand-file-name filename)
-      (current-buffer))
-     nil t)))
+  (url-retrieve
+   link
+   (lambda (status filename buffer)
+     (org-download--write-image status filename)
+     (cond ((org-download-org-mode-p)
+            (with-current-buffer buffer
+              (org-download--display-inline-images)))
+           ((eq major-mode 'dired-mode)
+            (let ((inhibit-message t))
+              (with-current-buffer (dired (file-name-directory filename))
+                (revert-buffer nil t))))))
+   (list
+    (expand-file-name filename)
+    (current-buffer))
+   nil t))
 
 (defun org-download-yank ()
   "Call `org-download-image' with current kill."
@@ -471,7 +474,7 @@ It's inserted before the image link and is used to annotate it.")
                  (apply #'org-download--fullname link-and-ext)))))
     (setq org-download-path-last-file filename)
     (org-download--image link filename)
-    (when (eq major-mode 'org-mode)
+    (when (org-download-org-mode-p)
       (when (eq org-download-method 'attach)
         (org-attach-attach filename nil 'none))
       (org-download-insert-link link filename))
@@ -624,7 +627,7 @@ When TIMES isn't nil, delete only TIMES links."
 (defun org-download-dnd (uri action)
   "When in `org-mode' and URI points to image, download it.
 Otherwise, pass URI and ACTION back to dnd dispatch."
-  (cond ((eq major-mode 'org-mode)
+  (cond ((org-download-org-mode-p)
          (condition-case nil
              (org-download-image uri)
            (error
@@ -641,7 +644,7 @@ Otherwise, pass URI and ACTION back to dnd dispatch."
   (org-download-image uri))
 
 (defun org-download-dnd-base64 (uri _action)
-  (when (eq major-mode 'org-mode)
+  (when (org-download-org-mode-p)
     (when (string-match "^data:image/png;base64," uri)
       (let* ((me (match-end 0))
              (filename (org-download--fullname
