@@ -203,8 +203,8 @@ For example:
 (declare-function posframe-show "ext:posframe")
 
 (defun org-download-org-mode-p ()
-  "Return `t' if major-mode or derived-mode-p equals 'org-mode."
-  (or (eq major-mode 'org-mode) (derived-mode-p 'org-mode)))
+  "Return `t' if major-mode or derived-mode-p equals 'org-mode, otherwise `nil'."
+  (or (eq major-mode 'org-mode) (when (derived-mode-p 'org-mode) t)))
 
 (defun org-download--display-inline-images ()
   (cond
