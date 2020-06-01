@@ -98,7 +98,8 @@ See `org-download--dir-1' for more info."
 
 (defcustom org-download-heading-lvl 0
   "Heading level to be used in `org-download--dir-2'."
-  :type 'integer)
+  :type
+  '(choice integer (const :tag "None" nil)))
 (make-variable-buffer-local 'org-download-heading-lvl)
 
 (defvar org-download-path-last-file nil
