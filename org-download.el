@@ -454,7 +454,7 @@ It's inserted before the image link and is used to annotate it.")
 (defun org-download--parse-link (link)
   (cond ((image-type-from-file-name link)
          (list link nil))
-        ((string-match "^file:///" link)
+        ((string-match "^file:/+" link)
          (list link nil))
         (t
          (let ((buffer (url-retrieve-synchronously link t)))
