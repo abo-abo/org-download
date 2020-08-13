@@ -66,3 +66,6 @@ Customize `org-download-backend` to choose between `url-retrieve`
 ;; Drag-and-drop to `dired`
 (add-hook 'dired-mode-hook 'org-download-enable)
 ```
+
+## Pasting from the clipboard
+If you have the image stored in the clipboard, use `org-download-clipboard`.

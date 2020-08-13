@@ -379,6 +379,25 @@ The screenshot tool is determined by `org-download-screenshot-method'."
     (org-download-image org-download-screenshot-file)
     (delete-file org-download-screenshot-file)))
 
+(defun org-download-clipboard ()
+  "Capture the image from the clipboard and insert the resulting file."
+  (interactive)
+  (let ((org-download-screenshot-method
+         (cl-case system-type
+           (gnu/linux
+            "xclip -selection clipboard -t image/png -o > %s")
+           ((windows-nt cygwin)
+            (if (executable-find "convert")
+                "convert clipboard: %s"
+              (user-error
+               "Please install the \"convert\" program included in ImageMagick.")))
+           ((darwin berkeley-unix)
+            (if (executable-find "pngpaste")
+                "pngpaste %s"
+              (user-error
+               "Please install the \"pngpaste\" program from Homebrew."))))))
+    (org-download-screenshot)))
+
 (declare-function org-attach-dir "org-attach")
 (declare-function org-attach-attach "org-attach")
 (declare-function org-attach-sync "org-attach")
