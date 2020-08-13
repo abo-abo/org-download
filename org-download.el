@@ -398,12 +398,12 @@ The screenshot tool is determined by `org-download-screenshot-method'."
             (if (executable-find "convert")
                 "convert clipboard: %s"
               (user-error
-               "Please install the \"convert\" program included in ImageMagick.")))
+               "Please install the \"convert\" program included in ImageMagick")))
            ((darwin berkeley-unix)
             (if (executable-find "pngpaste")
                 "pngpaste %s"
               (user-error
-               "Please install the \"pngpaste\" program from Homebrew."))))))
+               "Please install the \"pngpaste\" program from Homebrew"))))))
     (org-download-screenshot)))
 
 (declare-function org-attach-dir "org-attach")
