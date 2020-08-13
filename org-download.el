@@ -393,12 +393,20 @@ The screenshot tool is determined by `org-download-screenshot-method'."
   (let ((org-download-screenshot-method
          (cl-case system-type
            (gnu/linux
-            "xclip -selection clipboard -t image/png -o > %s")
+            (if (string= "wayland" (getenv "XDG_SESSION_TYPE"))
+                (if (executable-find "wl-paste")
+                    "wl-paste -t image/png > %s"
+                  (user-error
+                   "Please install the \"wl-paste\" program included in wl-clipboard"))
+              (if (executable-find "xclip")
+                  "xclip -selection clipboard -t image/png -o > %s"
+                (user-error
+                 "Please install the \"xclip\" program"))))
            ((windows-nt cygwin)
             (if (executable-find "convert")
                 "convert clipboard: %s"
               (user-error
-               "Please install the \"convert\" program included in ImageMagick.")))
+               "Please install the \"convert\" program included in ImageMagick")))
            ((darwin berkeley-unix)
             (if (executable-find "pngpaste")
                 "pngpaste %s"
