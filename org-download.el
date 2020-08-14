@@ -154,7 +154,11 @@ will be used."
           (const :tag "grim + slurp" "grim -g \"$(slurp)\" %s")
           (function :tag "Custom function")))
 
-(defcustom org-download-screenshot-file (expand-file-name "screenshot.png" temporary-file-directory)
+(defcustom org-download-screenshot-basename "screenshot.png"
+  "Default base filename to use for screenshots."
+  :type 'string)
+
+(defcustom org-download-screenshot-file (expand-file-name org-download-screenshot-basename temporary-file-directory)
   "The file to capture screenshots."
   :type 'string)
 
@@ -363,23 +367,26 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
   (org-download-image
    (replace-regexp-in-string "\n+$" "" (current-kill 0))))
 
-(defun org-download-screenshot ()
+(defun org-download-screenshot (&optional basename)
   "Capture screenshot and insert the resulting file.
 The screenshot tool is determined by `org-download-screenshot-method'."
   (interactive)
-  (let ((default-directory "~"))
-    (make-directory (file-name-directory org-download-screenshot-file) t)
+  (let* ((screenshot-dir (file-name-directory org-download-screenshot-file))
+         (org-download-screenshot-file
+          (if basename
+              (concat screenshot-dir basename) org-download-screenshot-file)))
+    (make-directory screenshot-dir t)
     (if (functionp org-download-screenshot-method)
         (funcall org-download-screenshot-method
                  org-download-screenshot-file)
       (shell-command-to-string
        (format org-download-screenshot-method
-               org-download-screenshot-file))))
-  (when (file-exists-p org-download-screenshot-file)
-    (org-download-image org-download-screenshot-file)
-    (delete-file org-download-screenshot-file)))
+               org-download-screenshot-file)))
+    (when (file-exists-p org-download-screenshot-file)
+      (org-download-image org-download-screenshot-file)
+      (delete-file org-download-screenshot-file))))
 
-(defun org-download-clipboard ()
+(defun org-download-clipboard (&optional basename)
   "Capture the image from the clipboard and insert the resulting file."
   (interactive)
   (let ((org-download-screenshot-method
@@ -396,7 +403,7 @@ The screenshot tool is determined by `org-download-screenshot-method'."
                 "pngpaste %s"
               (user-error
                "Please install the \"pngpaste\" program from Homebrew."))))))
-    (org-download-screenshot)))
+    (org-download-screenshot basename)))
 
 (declare-function org-attach-dir "org-attach")
 (declare-function org-attach-attach "org-attach")
