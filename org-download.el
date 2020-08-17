@@ -75,6 +75,7 @@
 (require 'url-http)
 (require 'org)
 (require 'org-attach)
+(require 'org-element)
 
 (defgroup org-download nil
   "Image drag-and-drop for org-mode."
