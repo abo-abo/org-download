@@ -251,7 +251,7 @@ It's `org-download-image-dir', unless it's nil.  Then it's \".\"."
 (defun org-download--dir-2 ()
   "Return the second part of the directory path for `org-download--dir'.
 Unless `org-download-heading-lvl' is nil, it's the name of the current
-`org-download-heading-lvl'-leveled heading.  Otherwise it's \"\"."
+`org-download-heading-lvl'-leveled heading."
   (when org-download-heading-lvl
     (org-download-get-heading
      org-download-heading-lvl)))
