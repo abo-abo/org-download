@@ -70,7 +70,7 @@
 
 
 (eval-when-compile
-  (require 'cl))
+  (require 'cl-lib))
 (require 'async)
 (require 'url-parse)
 (require 'url-http)
