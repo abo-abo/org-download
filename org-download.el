@@ -280,9 +280,11 @@ The directory is created if it didn't exist before."
 It's affected by `org-download--dir'.
 EXT can hold the file extension, in case LINK doesn't provide it."
   (let ((filename
-         (file-name-nondirectory
-          (car (url-path-and-query
-                (url-generic-parse-url link)))))
+         (replace-regexp-in-string
+          "%20" " "
+          (file-name-nondirectory
+           (car (url-path-and-query
+                 (url-generic-parse-url link))))))
         (dir (org-download--dir)))
     (when (string-match ".*?\\.\\(?:png\\|jpg\\)\\(.*\\)$" filename)
       (setq filename (replace-match "" nil nil filename 1)))
