@@ -58,6 +58,11 @@ optionally add a timestamp to the file name.
 Customize `org-download-backend` to choose between `url-retrieve`
 (the default) or `wget` or `curl`.
 
+if you don't want to show the `#+DOWNLOAD` anonotate, use this:
+```
+(setq org-download-annotate-function (lambda (_link) ""))
+```
+
 ## Set up
 
 ```elisp
