@@ -367,8 +367,12 @@ COMMAND is a format-style string with two slots for LINK and FILENAME."
 (defun org-download-yank ()
   "Call `org-download-image' with current kill."
   (interactive)
-  (org-download-image
-   (replace-regexp-in-string "\n+$" "" (current-kill 0))))
+  (let ((k (current-kill 0)))
+    (unless (url-type (url-generic-parse-url k))
+      (user-error "Not a URL: %s" k))
+    (org-download-image
+     (replace-regexp-in-string
+      "\n+$" "" k))))
 
 (defun org-download-screenshot (&optional basename)
   "Capture screenshot and insert the resulting file.
