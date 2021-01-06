@@ -453,7 +453,7 @@ It's inserted before the image link and is used to annotate it.")
             (const :tag "rel2home" org-download-return-path-relative-to-home)))
 
 (defun org-download-return-path-relative-to-home (filename-full)
-  (concat (string-remove-prefix (file-truename "~/") filename-full)))
+  (string-remove-prefix (file-truename "~/") filename-full))
 
 (defun org-download-link-format-function-default (filename)
   "The default function of `org-download-link-format-function'."
