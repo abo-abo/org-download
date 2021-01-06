@@ -446,10 +446,14 @@ It's inserted before the image link and is used to annotate it.")
   :type 'function)
 
 (defcustom org-download-abbreviate-filename-function #'file-relative-name
-  "Function that takes FILENAME and returns an abbreviated file name."
-  :type '(choice
-          (const :tag "relative" file-relative-name)
-          (const :tag "absolute" expand-file-name)))
+    "Function that takes FILENAME and returns an abbreviated file name."
+    :type '(choice
+            (const :tag "relative" file-relative-name)
+            (const :tag "absolute" expand-file-name)
+            (const :tag "rel2home" org-download-return-path-relative-to-home)))
+
+(defun org-download-return-path-relative-to-home (filename-full)
+  (concat (string-remove-prefix (file-truename "~/") filename-full)))
 
 (defun org-download-link-format-function-default (filename)
   "The default function of `org-download-link-format-function'."
