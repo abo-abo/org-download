@@ -506,7 +506,7 @@ It's inserted before the image link and is used to annotate it.")
   (interactive "sUrl: ")
   (let* ((link-and-ext (org-download--parse-link link))
          (filename
-          (cond ((eq org-download-method 'attach)
+          (cond ((and (eq major-mode 'org-mode) (eq org-download-method 'attach))
                  (let ((org-download-image-dir (org-attach-dir t))
                        org-download-heading-lvl)
                    (apply #'org-download--fullname link-and-ext)))
