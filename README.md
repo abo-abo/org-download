@@ -58,6 +58,11 @@ optionally add a timestamp to the file name.
 Customize `org-download-backend` to choose between `url-retrieve`
 (the default) or `wget` or `curl`.
 
+if you don't want to show the `#+DOWNLOAD` anonotate, use this:
+```
+(setq org-download-annotate-function (lambda (_link) ""))
+```
+
 ## Set up
 
 ```elisp
@@ -69,3 +74,29 @@ Customize `org-download-backend` to choose between `url-retrieve`
 
 ## Pasting from the clipboard
 If you have the image stored in the clipboard, use `org-download-clipboard`.
+
+here is an example. shortcut `C-M-y` will have the image stored from the clipboard in the path `images/$currentfilename/%Y%m%d-%H%M%S_$imagename.png` 
+
+```
+(defun zz/org-download-paste-clipboard (&optional use-default-filename)
+  (interactive "P")
+  (require 'org-download)
+  (setq org-download-image-dir (concat "images/" (file-name-sans-extension (buffer-name))))
+  (let ((file
+         (if (not use-default-filename)
+             (read-string (format "Filename [%s]: " org-download-screenshot-basename)
+                          nil nil org-download-screenshot-basename)
+           nil)))
+(org-download-clipboard file)))
+
+(after! org
+  (setq org-download-method 'directory)
+  (setq org-download-image-dir  "images/")
+  (setq org-download-heading-lvl nil)
+  (setq org-download-timestamp "%Y%m%d-%H%M%S_")
+  (setq org-image-actual-width nil)
+  (setq org-src-window-setup 'split-window-right)
+  (setq org-download-annotate-function (lambda (_link) ""))
+(map! :map org-mode-map
+        "C-M-y" #'zz/org-download-paste-clipboard ))
+```
