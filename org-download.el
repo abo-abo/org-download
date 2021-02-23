@@ -536,7 +536,8 @@ It's inserted before the image link and is used to annotate it.")
          (new-path (concat dir-path "/" new-name "." ext)))
     (rename-file current-path new-path)
     (message "File successfully renamed...")
-    (org-download-replace-all current-name (concat new-name "." ext))))
+    (org-download-replace-all current-name (concat new-name "." ext))
+    (org-display-inline-images)))
 
 (defun org-download-rename-last-file ()
   "Rename the last downloaded file saved in your computer."
