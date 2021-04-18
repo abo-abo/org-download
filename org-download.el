@@ -195,6 +195,10 @@ For example:
     (const :tag "Off" nil)
     (const :tag "Posframe" posframe)))
 
+(defcustom org-download-insert-annotate t
+  "Should we insert `#+DOWNLOADED' line or not"
+  :type 'boolean)
+
 (defvar org-download-posframe-show-params
   '(;; Please do not remove :timeout or set it to large.
     :timeout 1
@@ -569,7 +573,8 @@ It's inserted before the image link and is used to annotate it.")
     (if (looking-back "^[ \t]+" line-beg)
         (delete-region (match-beginning 0) (match-end 0))
       (newline))
-    (insert (funcall org-download-annotate-function link))
+    (when org-download-insert-annotate
+      (insert (funcall org-download-annotate-function link)))
     (dolist (attr org-download-image-attr-list)
       (insert attr "\n"))
     (insert (if (= org-download-image-html-width 0)
