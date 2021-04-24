@@ -239,7 +239,8 @@ For example:
               (if heading
                   (replace-regexp-in-string
                    " " "_"
-                   heading)
+                   (org-link-display-format
+                    heading))
                 "")))
         ""))))
 
