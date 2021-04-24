@@ -76,6 +76,10 @@
 (require 'org)
 (require 'org-attach)
 (require 'org-element)
+(eval-when-compile
+  (when (or (version<= "27.1" emacs-version)
+            (version<= "9.3" org-version))
+    (require 'ol)))
 
 (defgroup org-download nil
   "Image drag-and-drop for org-mode."
@@ -239,8 +243,10 @@ For example:
               (if heading
                   (replace-regexp-in-string
                    " " "_"
-                   (org-link-display-format
-                    heading))
+                   (if (fboundp 'org-link-display-format)
+                       (org-link-display-format
+                        heading)
+                     heading))
                 "")))
         ""))))
 
