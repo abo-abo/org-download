@@ -134,9 +134,9 @@ will be used."
           (const :tag "scrot" "scrot -s %s")
           (const :tag "flameshot" "flameshot gui --raw > %s")
           (const :tag "gm" "gm import %s")
-          (const :tag "imagemagick/import" "import %s")
+          (const :tag "imagemagick/import" "magick import %s")
           (const :tag "imagemagick/import + xclip to save to clipboard"
-           "export filename=\"%s\"; import png:\"$filename\" ;xclip -selection clipboard -target image/png -filter < \"$filename\" &>/dev/null")
+                 "export filename=\"%s\"; import png:\"$filename\" ;xclip -selection clipboard -target image/png -filter < \"$filename\" &>/dev/null")
           (const :tag "xfce4-screenshooter" "xfce4-screenshooter -r -o cat > %s")
           ;; screenshot method in ms-windows, /capture=4 stands for interactive.
           (const :tag "IrfanView" "i_view64 /capture=4 /convert=\"%s\"")
@@ -148,10 +148,10 @@ will be used."
           (const :tag "spectacle" "spectacle -br -o %s")
           ;; take an image that is already on the clipboard, for Linux
           (const :tag "xclip"
-           "xclip -selection clipboard -t image/png -o > %s")
+                 "xclip -selection clipboard -t image/png -o > %s")
           ;; take an image that is already on the clipboard, for Windows
-          (const :tag "imagemagick/convert" "convert clipboard: %s")
-          ; capture region, for Wayland
+          (const :tag "imagemagick/convert" "magick clipboard: %s")
+          ;; capture region, for Wayland
           (const :tag "grim + slurp" "grim -g \"$(slurp)\" %s")
           (function :tag "Custom function")))
 
