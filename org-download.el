@@ -134,9 +134,9 @@ will be used."
           (const :tag "scrot" "scrot -s %s")
           (const :tag "flameshot" "flameshot gui --raw > %s")
           (const :tag "gm" "gm import %s")
-          (const :tag "imagemagick/import" "import %s")
+          (const :tag "imagemagick/import" "magick import %s")
           (const :tag "imagemagick/import + xclip to save to clipboard"
-           "export filename=\"%s\"; import png:\"$filename\" ;xclip -selection clipboard -target image/png -filter < \"$filename\" &>/dev/null")
+                 "export filename=\"%s\"; import png:\"$filename\" ;xclip -selection clipboard -target image/png -filter < \"$filename\" &>/dev/null")
           (const :tag "xfce4-screenshooter" "xfce4-screenshooter -r -o cat > %s")
           ;; screenshot method in ms-windows, /capture=4 stands for interactive.
           (const :tag "IrfanView" "i_view64 /capture=4 /convert=\"%s\"")
@@ -148,10 +148,10 @@ will be used."
           (const :tag "spectacle" "spectacle -br -o %s")
           ;; take an image that is already on the clipboard, for Linux
           (const :tag "xclip"
-           "xclip -selection clipboard -t image/png -o > %s")
+                 "xclip -selection clipboard -t image/png -o > %s")
           ;; take an image that is already on the clipboard, for Windows
-          (const :tag "imagemagick/convert" "convert clipboard: %s")
-          ; capture region, for Wayland
+          (const :tag "imagemagick/convert" "magick clipboard: %s")
+          ;; capture region, for Wayland
           (const :tag "grim + slurp" "grim -g \"$(slurp)\" %s")
           (function :tag "Custom function")))
 
@@ -409,10 +409,10 @@ The screenshot tool is determined by `org-download-screenshot-method'."
                 (user-error
                  "Please install the \"xclip\" program"))))
            ((windows-nt cygwin)
-            (if (executable-find "convert")
-                "convert clipboard: %s"
+            (if (executable-find "magick")
+                "magick clipboard: %s"
               (user-error
-               "Please install the \"convert\" program included in ImageMagick")))
+               "Please install the program ImageMagick")))
            ((darwin berkeley-unix)
             (if (executable-find "pngpaste")
                 "pngpaste %s"
@@ -610,17 +610,6 @@ It's inserted before the image link and is used to annotate it.")
                                (region-end))
          (delete-region (region-beginning)
                         (region-end)))
-
-        ((looking-at org-link-any-re)
-         (let ((fname (org-link-unescape
-                       (match-string-no-properties 2))))
-           (when (file-exists-p fname)
-             (delete-file fname)
-             (delete-region (match-beginning 0)
-                            (match-end 0))
-             (when (eolp)
-               (delete-char 1)))))
-
         (t (org-download--delete (line-beginning-position)
                                  (line-end-position))))
   (when (eq org-download-method 'attach)
@@ -652,12 +641,16 @@ When TIMES isn't nil, delete only TIMES links."
   (save-excursion
     (goto-char beg)
     (while (and (>= (cl-decf times) 0)
-                (re-search-forward "\\[\\[file:\\([^]]*\\)\\]\\]" end t))
-      (let ((str (match-string-no-properties 1)))
-        (delete-region beg
-                       (match-end 0))
+                (re-search-forward "\\[\\[\\(file\\|attachment\\):\\([^]]*\\)\\]\\]" end t))
+      (let ((link-type (match-string-no-properties 1))
+            (str (match-string-no-properties 2)))
+        (delete-region beg (match-end 0))
+        (if (string-equal link-type "attachment")
+            (setq str (expand-file-name str (org-attach-dir))))
+        (message str)
         (when (file-exists-p str)
-          (delete-file str))))))
+          (delete-file str)))
+      )))
 
 (defun org-download-dnd-fallback (uri action)
   (let ((dnd-protocol-alist
