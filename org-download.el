@@ -150,7 +150,7 @@ will be used."
           (const :tag "xclip"
                  "xclip -selection clipboard -t image/png -o > %s")
           ;; take an image that is already on the clipboard, for Windows
-          (const :tag "imagemagick/convert" "convert clipboard: %s")
+          (const :tag "imagemagick/convert" "magick clipboard: %s")
           ;; capture region, for Wayland
           (const :tag "grim + slurp" "grim -g \"$(slurp)\" %s")
           (function :tag "Custom function")))
@@ -409,10 +409,10 @@ The screenshot tool is determined by `org-download-screenshot-method'."
                 (user-error
                  "Please install the \"xclip\" program"))))
            ((windows-nt cygwin)
-            (if (executable-find "convert")
-                "convert clipboard: %s"
+            (if (executable-find "magick")
+                "magick clipboard: %s"
               (user-error
-               "Please install the \"convert\" program included in ImageMagick")))
+               "Please install the program ImageMagick")))
            ((darwin berkeley-unix)
             (if (executable-find "pngpaste")
                 "pngpaste %s"
