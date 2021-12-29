@@ -418,6 +418,7 @@ The screenshot tool is determined by `org-download-screenshot-method'."
                 "pngpaste %s"
               (user-error
                "Please install the \"pngpaste\" program from Homebrew."))))))
+    (org-id-get-create)
     (org-download-screenshot basename)))
 
 (declare-function org-attach-dir "org-attach")
