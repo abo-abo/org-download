@@ -289,7 +289,7 @@ EXT can hold the file extension, in case LINK doesn't provide it."
     (when (string-match ".*?\\.\\(?:png\\|jpg\\)\\(.*\\)$" filename)
       (setq filename (replace-match "" nil nil filename 1)))
     (when ext
-      (setq filename (concat filename "." ext)))
+      (setq filename (concat (file-name-sans-extension filename) "." ext)))
     (abbreviate-file-name
      (expand-file-name
       (funcall org-download-file-format-function filename)
