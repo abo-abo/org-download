@@ -409,10 +409,10 @@ The screenshot tool is determined by `org-download-screenshot-method'."
                 (user-error
                  "Please install the \"xclip\" program"))))
            ((windows-nt cygwin)
-            (if (executable-find "convert")
-                "convert clipboard: %s"
+            (if (executable-find "magick")
+                "magick convert clipboard: %s"
               (user-error
-               "Please install the \"convert\" program included in ImageMagick")))
+               "Please install the \"magick\" program included in ImageMagick")))
            ((darwin berkeley-unix)
             (if (executable-find "pngpaste")
                 "pngpaste %s"
