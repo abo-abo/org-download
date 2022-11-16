@@ -555,7 +555,7 @@ It's inserted before the image link and is used to annotate it.")
       (org-download--display-inline-images))))
 
 (defun org-download-replace-all (oldpath newpath)
-  "Function to search for the OLDPATH inside the buffer and replace it by the NEWPATH."
+  "Search for OLDPATH inside the buffer and replace it by NEWPATH."
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward oldpath nil t)
