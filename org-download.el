@@ -638,12 +638,19 @@ It's inserted before the image link and is used to annotate it.")
   (let ((context (org-element-context)))
     (if (not (eq (car-safe context) 'link))
         (user-error "Not on a link")
-      (start-process-shell-command
-       "org-download-edit"
-       "org-download-edit"
-       (format org-download-edit-cmd
-               (shell-quote-wildcard-pattern
-                (url-unhex-string (plist-get (cadr context) :path))))))))
+      (let* ((filename (url-unhex-string (plist-get (cadr context) :path)))
+             (type (plist-get (car (cdr context)) :type))
+             (filepath (if (string= type "attachment")
+                             (org-attach-expand filename)
+                         filename
+                         ))
+             )
+        (start-process-shell-command
+         "org-download-edit"
+         "*org-download-edit*"
+         (format org-download-edit-cmd
+                 (shell-quote-wildcard-pattern filepath)))))))
+
 
 (defun org-download--delete (beg end &optional times)
   "Delete inline image links and the files they point to between BEG and END.
