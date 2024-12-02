@@ -205,6 +205,10 @@ For example:
     :poshandler posframe-poshandler-window-center)
   "List of parameters passed to `posframe-show'.")
 
+(defcustom org-download-disable-id-create nil
+  "When non-nil disable creation of ids when calling `org-download-clipboard`."
+  :type 'boolean)
+
 (declare-function posframe-workable-p "ext:posframe")
 (declare-function posframe-show "ext:posframe")
 
@@ -418,7 +422,8 @@ The screenshot tool is determined by `org-download-screenshot-method'."
                 "pngpaste %s"
               (user-error
                "Please install the \"pngpaste\" program from Homebrew."))))))
-    (org-id-get-create)
+    (unless org-download-disable-id-create
+      (org-id-get-create))
     (org-download-screenshot basename)))
 
 (declare-function org-attach-dir "org-attach")
